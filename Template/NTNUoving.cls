@@ -54,7 +54,7 @@
   \def\PageText#1#2{Side #1 av #2}%
   \def\NTNUa{Norges teknisk--naturvitenskapelige universitet}%
   \def\NTNUi{Sett meg med \textbackslash institutt-kommandoen}%
-  \def\OVING{\quad Henrik Hørlück Berg\\\quad Jorunn Leithe  \\\quad Jørgen Rosager  \\\quad {\O}ving}%
+  \def\OVING{\quad Jørgen Rosager  \\\quad {\O}ving}%
   \def\LANGINFO{Bokm{\aa}l}%
 }
 \addto\extrasnynorsk{%
@@ -68,7 +68,7 @@
   \def\PageText#1#2{Page #1 of #2}%
   \def\NTNUa{Norwegian University of Science and Technology}%
   \def\NTNUi{Set me with the \textbackslash institutt-command}%
-  \def\OVING{\quad Henrik Hørlück Berg\\\quad Jorunn Leithe  \\\quad Jørgen Rosager   \\\quad Theoretical Exercise}
+  \def\OVING{\quad Jørgen Rosager   \\\quad Exercise}
   \def\LANGINFO{English}%
 }
 
