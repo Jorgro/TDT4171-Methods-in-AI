@@ -1,4 +1,4 @@
-\documentclass[11pt, a4paper, english]{../Template/NTNUoving}
+\documentclass[10pt, a4paper, english]{../Template/NTNUoving}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{float}
@@ -44,28 +44,124 @@
 
     % c
     \begin{punkt}
+        Let $S_1$, $S_2$ and $S_3$ denote the siblings for each of the friends.
 
+        There are 3 permutations for who can have 3 siblings and the other 0 siblings,
+        only 1 permutation where each have 1 sibling and $3\cdot2=6$ permutations for who can have 2 siblings, 1 sibling and 0 sibling
+        (we first have 3 choices for the friend with 2 siblings, then 2 choices for the one with 1 sibling).
+        This gives us:
+
+        \begin{align*}
+            P(S_1 + S_2 + S_3 = 3)
+            &= 3P(S_1 = 3)P(S_2 = 0)P(S_3 = 0) \\
+            &+ P(S_1 = 1)P(S_2 = 1)P(S_3 = 1) \\
+            &+ 6P(S_1 = 2)P(S_2 = 1)P(S_3 = 0) \\
+            &= 3\cdot0.06\cdot0.15^2 + 0.49^3 + 6\cdot0.27\cdot0.49\cdot0.15\\
+            &= 0.240769
+        \end{align*}
     \end{punkt}
 
     % d
     \begin{punkt}
+        Let $S_E$ and $S_J$ denote siblings for Emma and Jacob respectfully. We have:
+        \begin{align*}
+            P(S_E = 0 | S_E + S_J = 3)
+            &= \frac{P(S_E = 0 \wedge S_E + S_J = 3)}{P(S_E + S_J = 3)} \\
+            P(S_E = 0 \wedge S_E + S_J = 3) &= P(S_E = 0)P(S_J = 3) \\
+            P(S_E + S_J = 3) &= 2 P(S_E = 0)P(S_J = 3) + 2 P(S_E = 1)P(S_J = 2) \\
+            \implies P(S_E = 0 | S_E + S_J = 3) &= \frac{P(S_E = 0)P(S_J = 3)}{2 P(S_E = 0)P(S_J = 3) + 2 P(S_E = 1)P(S_J = 2)} \\
+            &= \frac{0.15\cdot0.06}{2\cdot0.15\cdot0.06 + 2\cdot0.49\cdot0.27} \\
+            &= \frac{5}{157} \approx 0.031847
+        \end{align*}
     \end{punkt}
 \end{oppgave}
 
 % Problem 2
 \begin{oppgave}
+    %a
     \begin{punkt}
+        Every node can be represented by $2^k$ numbers where $k$ is the number of parent nodes when each variable has a Boolean state.
+        This gives us the following:
+        \begin{center}
+            \begin{tabular}{ |c|c| }
+             \hline
+             Variable & Numbers needed \\
+             \hline
+             A  & 1 \\
+             \hline
+             B &  2 \\
+             \hline
+             C &  2 \\
+             \hline
+             D &  2 \\
+             \hline
+             E &  4 \\
+             \hline
+             F &  4 \\
+             \hline
+             G &  2 \\
+             \hline
+             H &  1 \\
+             \hline
+             Sum &  18 \\
+             \hline
+            \end{tabular}
+            \end{center}
+            As we can see the sum is 18 numbers needed and the statement is thus \textbf{true}.
+    \end{punkt}
+
+    % A node X is conditionally independent of its non-descendants given its parents.
+    % A node X is conditionally independent of all othr nodes in the network given its Market blanket.
+    % Markov blanket: Parents, children and children's parents
+    % b
+    \begin{punkt}
+        \textbf{False}, since both $G$ and $A$ have $E$ as an descendant and we are not given any evidence they are not independent.
+    \end{punkt}
+
+    % c
+    \begin{punkt}
+        \textbf{False}, since $E$ is not given both its parents it can't be conditionally independent from $H$.
+    \end{punkt}
+
+    % d
+    \begin{punkt}
+        \textbf{True}, since $E$ is given both its parents it is conditionally independent from $H$.
     \end{punkt}
 \end{oppgave}
 
 % Problem 3
 \begin{oppgave}
+
+    % a
+    \begin{punkt}
+
+    \end{punkt}
+
+     % b
+     \begin{punkt}
+     \end{punkt}
+
+      % c
     \begin{punkt}
     \end{punkt}
+
+     % d
+     \begin{punkt}
+     \end{punkt}
 \end{oppgave}
 
 % Problem 4
 \begin{oppgave}
+
+    % a
+    \begin{punkt}
+    \end{punkt}
+
+    % c
+    \begin{punkt}
+    \end{punkt}
+
+    % c
     \begin{punkt}
     \end{punkt}
 \end{oppgave}
