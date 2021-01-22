@@ -86,7 +86,7 @@ class Variable:
         s += '+----------+' + '----------+' * width + '\n'
 
         return s
-
+    def __repr__(self):
         return "Node " + self.name
 
     def probability(self, state, parentstates):
@@ -207,13 +207,13 @@ class InferenceByEnumeration:
         # to make sure that a function doesn't change the variable, you should pass a copy.
         # You can make a copy of a variable by calling variable.copy()
 
-        q = np.zeros(2) # Fix for higher dimension X too
+        q = np.zeros(self.bayesian_network.variables[X].no_states)
         for i in range(self.bayesian_network.variables[X].no_states):
             e = evidence.copy()
             e[X] = i
             q[i] = self._enumerate_all(self.topo_order.copy(), e)
             # self.bayesian_network.variables [X].table[i] =  self._enumerate_all(self.topo_order.copy(), e)
-        return q/(q[0]+q[1])
+        return q/(np.sum(q))
 
     def _enumerate_all(self, variables, evidence):
         if not variables:
@@ -225,7 +225,6 @@ class InferenceByEnumeration:
         v.remove(Y)
         if Y.name in evidence.keys():
             e = evidence.copy()
-            # TODO: Refactor val calc
             return Y.probability(e[Y.name], e)*self._enumerate_all(v, e)
         else:
             sum_over_y = 0
@@ -309,7 +308,7 @@ def problem3c():
     print(d3)
 
     print(f"Probability distribution, P({d4.name} | {d2.name})")
-    print(d3)
+    print(d4)
 
     bn = BayesianNetwork()
 
@@ -329,11 +328,41 @@ def problem3c():
 
 
 def monty_hall():
-    # TODO: Implement the monty hall problem as described in Problem 4c)
-    pass
+    chosen_by_guest = Variable('A', 3, [[1/3], [1/3], [1/3]])
+    prize = Variable('B', 3, [[1/3], [1/3], [1/3]])
+    opened_by_host = Variable('C', 3,
+                        [[0.0, 0.0, 0.0, 0.5, 0.5, 1.0, 0.0, 1.0, 0.5],
+                        [0.5, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5],
+                        [0.5, 1.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0]],
+                  parents=['A', 'B'],
+                  no_parent_states=[3, 3])
+
+    print(f"Probability distribution, P({chosen_by_guest.name})")
+    print(chosen_by_guest)
+
+    print(f"Probability distribution, P({prize.name})")
+    print(prize)
+
+    print(f"Probability distribution, P({opened_by_host.name} | {prize.name}, {chosen_by_guest.name})")
+    print(opened_by_host)
+
+    bn = BayesianNetwork()
+
+    bn.add_variable(prize)
+    bn.add_variable(opened_by_host)
+    bn.add_variable(chosen_by_guest)
+    bn.add_edge(prize, opened_by_host)
+    bn.add_edge(chosen_by_guest, opened_by_host)
+
+    inference = InferenceByEnumeration(bn)
+    posterior = inference.query('A', {'B': 0, 'C': 2}) # Using 0 indexing on the doors => door 0 => door 1 and door 2 => door 3
+
+    print(f"Probability distribution, P({prize.name} | {chosen_by_guest.name}, {opened_by_host.name})")
+    print(posterior)
+
 
 
 if __name__ == '__main__':
     # test()
-    problem3c()
-    # monty_hall()
+    # problem3c()
+    monty_hall()
