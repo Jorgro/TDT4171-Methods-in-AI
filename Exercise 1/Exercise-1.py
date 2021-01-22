@@ -207,31 +207,33 @@ class InferenceByEnumeration:
         # to make sure that a function doesn't change the variable, you should pass a copy.
         # You can make a copy of a variable by calling variable.copy()
 
+        q = np.zeros(2) # Fix for higher dimension X too
         for i in range(self.bayesian_network.variables[X].no_states):
             e = evidence.copy()
             e[X] = i
-            self.bayesian_network.variables[X].table[i] =  self._enumerate_all(self.topo_order.copy(), e)
-
-        return normalize()
+            q[i] = self._enumerate_all(self.topo_order.copy(), e)
+            # self.bayesian_network.variables [X].table[i] =  self._enumerate_all(self.topo_order.copy(), e)
+        return q/(q[0]+q[1])
 
     def _enumerate_all(self, variables, evidence):
         if not variables:
             return 1.0
 
-        Y = variables[0] # Change to use lexicographical ordering
+        Y = variables[0]
 
         v = variables.copy()
-        rest = variables.remove(Y)
-
+        v.remove(Y)
         if Y.name in evidence.keys():
             e = evidence.copy()
-            return self.bayesian_network.variables[Y.name][evidence[Y.name]][Y.parents]*self._enumerate_all(rest, e)
+            # TODO: Refactor val calc
+            return Y.probability(e[Y.name], e)*self._enumerate_all(v, e)
         else:
             sum_over_y = 0
             for i in range(Y.no_states):
                 e = evidence.copy()
                 e[Y.name] = i
-                sum_over_y += self.bayesian_network.variables[Y.name][evidence[Y.name]][Y.parents]*self._enumerate_all(rest, e)
+                sum_over_y += Y.probability(e[Y.name], e)*self._enumerate_all(v, e)
+
             return sum_over_y
 
 
@@ -241,6 +243,7 @@ class InferenceByEnumeration:
         Tabular variable instead of a vector
         """
         q = self._enumeration_ask(var, evidence).reshape(-1, 1)
+        print("q: ", q)
         return Variable(var, self.bayesian_network.variables[var].no_states, q)
 
 def test():
@@ -319,7 +322,7 @@ def problem3c():
     bn.add_edge(d2, d4)
 
     inference = InferenceByEnumeration(bn)
-    posterior = inference.query('C', {'D': 1})
+    posterior = inference.query('A', {'D': 0, 'C': 1})
 
     print(f"Probability distribution, P({d3.name} | {d4.name})")
     print(posterior)
