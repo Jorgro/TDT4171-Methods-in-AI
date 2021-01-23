@@ -86,7 +86,11 @@ class Variable:
         s += '+----------+' + '----------+' * width + '\n'
 
         return s
+
     def __repr__(self):
+        """
+        Better representation of object when printing a list
+        """
         return "Node " + self.name
 
     def probability(self, state, parentstates):
@@ -164,11 +168,13 @@ class BayesianNetwork:
 
     def sorted_nodes(self):
         """
-        Kahn's algorithm for putting variables in lexicographical topological order.
-        Returns: List of sorted variable names.
+        Kahn's algorithm for putting variables in lexicographical topological order
+
+        Returns:
+            List of sorted variables
         """
-        L = []
-        S = []
+        L = [] # List with topological order
+        S = [] # List of nodes with no incoming edges
 
         edges_copy = self.edges.copy()
 
@@ -191,6 +197,8 @@ class BayesianNetwork:
 
                     if not m_has_incoming_edge:
                         S.append(m)
+
+        # TODO: Error check if edges
         return L
 
 
@@ -219,14 +227,16 @@ class InferenceByEnumeration:
         if not variables:
             return 1.0
 
-        Y = variables[0]
+        Y = variables[0] # Y is the first
 
         v = variables.copy()
         v.remove(Y)
         if Y.name in evidence.keys():
+            # Calculate the probability with the assignment of Y
             e = evidence.copy()
             return Y.probability(e[Y.name], e)*self._enumerate_all(v, e)
         else:
+            # Calculate the sum over all possible assignments of Y
             sum_over_y = 0
             for i in range(Y.no_states):
                 e = evidence.copy()
@@ -242,46 +252,8 @@ class InferenceByEnumeration:
         Tabular variable instead of a vector
         """
         q = self._enumeration_ask(var, evidence).reshape(-1, 1)
-        print("q: ", q)
         return Variable(var, self.bayesian_network.variables[var].no_states, q)
 
-def test():
-    d1 = Variable('A', 2, [[0.8], [0.2]])
-    d2 = Variable('B', 2, [[0.5, 0.2],
-                           [0.5, 0.8]],
-                  parents=['A'],
-                  no_parent_states=[2])
-    d3 = Variable('C', 2, [[0.1, 0.3],
-                           [0.9, 0.7]],
-                  parents=['B'],
-                  no_parent_states=[2])
-    d4 = Variable('D', 2, [[0.6, 0.8],
-                           [0.4, 0.2]],
-                  parents=['B'],
-                  no_parent_states=[2])
-
-    print(f"Probability distribution, P({d1.name})")
-    print(d1)
-
-    print(f"Probability distribution, P({d2.name} | {d1.name})")
-    print(d2)
-
-    print(f"Probability distribution, P({d3.name} | {d2.name})")
-    print(d3)
-
-    print(f"Probability distribution, P({d4.name} | {d2.name})")
-    print(d3)
-
-    bn = BayesianNetwork()
-
-    bn.add_variable(d1)
-    bn.add_variable(d2)
-    bn.add_variable(d3)
-    bn.add_variable(d4)
-    bn.add_edge(d1, d2)
-    bn.add_edge(d2, d3)
-    bn.add_edge(d2, d4)
-    print(bn.sorted_nodes())
 
 def problem3c():
     d1 = Variable('A', 2, [[0.8], [0.2]])
@@ -364,5 +336,5 @@ def monty_hall():
 
 if __name__ == '__main__':
     # test()
-    problem3c()
-    # monty_hall()
+    # problem3c()
+    monty_hall()

@@ -173,20 +173,69 @@
         $\alpha$ is the normalizing factor.
      \end{punkt}
 \end{oppgave}
-
+\clearpage
 % Problem 4
 \begin{oppgave}
-
-    % a
-    \begin{punkt}
-    \end{punkt}
-
     % c
+    \setcounter{Punkt}{2}
     \begin{punkt}
-    \end{punkt}
+        The Monty-Hall problem can be described by a bayesian network where $OpenedByHost$ is conditional based on $Prize$ and $ChosenByGuest$:
 
-    % c
-    \begin{punkt}
+        \begin{figure}[h]
+            \centering
+            \includegraphics[width=0.5\textwidth]{BN.png}
+            \caption{Bayesian network for the Monty Hall-problem.}
+
+            \end{figure}
+
+        The conditional probability tables are given by:
+        \begin{table}[h!]
+            \centering
+            \begin{tabular}{|c|c|}
+                \hline
+                & $P(Prize)$ \\ [0.5ex]
+                \hline
+                $Door1$ & 0.333 \\ [1.0ex]
+                $Door2$ & 0.333 \\ [1.0ex]
+                $Door3$ & 0.333 \\ [1.0ex]
+                \hline
+            \end{tabular}
+            \caption{Probability distribution for $Prize$.}
+        \end{table}
+
+        \begin{table}[h!]
+            \centering
+            \begin{tabular}{|c|c|}
+                \hline
+                & $P(ChosenByGuest)$ \\ [0.5ex]
+                \hline
+                $Door1$ & 0.333 \\ [1.0ex]
+                $Door2$ & 0.333 \\ [1.0ex]
+                $Door3$ & 0.333 \\ [1.0ex]
+                \hline
+            \end{tabular}
+            \caption{Probability distribution for $ChosenByGuest$.}
+        \end{table}
+
+        \begin{table}[h!]
+            \centering
+            \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+                \hline
+                $Prize$ & 0 & 1 & 2 & 0 & 1 & 2 & 0 & 1 & 2 \\ [1.0ex]
+                $ChosenByGuest$ & 0 & 0 & 0 & 1 & 1 & 1 & 2& 2 & 2 \\ [1.0ex]
+                \hline
+                $Door1$ & 0 & 0 & 0 & 0.5 & 0.5 & 1 & 0 & 1  & 0.5 \\ [1.0ex]
+                $Door2$ & 0.5 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0.5 \\ [1.0ex]
+                $Door3$ & 0.5 & 1 & 0 & 0.5 & 0.5 & 0 & 0 & 0 & 0 \\ [1.0ex]
+                \hline
+            \end{tabular}
+            \caption{Probability distribution for $ChosenByGuest$.}
+        \end{table}
+
+        \begin{align*}
+            P(Prize | ChosenByGuest = 1, OpenedByHost = 3) &= \langle 0.3333, 0.6667, 0.0000 \rangle
+        \end{align*}
+        Based on this it is of the interest of the guest to switch their choice.
     \end{punkt}
 \end{oppgave}
 \end{document}
