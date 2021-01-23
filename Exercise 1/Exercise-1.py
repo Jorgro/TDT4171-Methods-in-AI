@@ -321,7 +321,7 @@ def problem3c():
     bn.add_edge(d2, d4)
 
     inference = InferenceByEnumeration(bn)
-    posterior = inference.query('A', {'D': 0, 'C': 1})
+    posterior = inference.query('A', {'D': 0, 'C': 1}) # 0 = True, 1 = False
 
     print(f"Probability distribution, P({d3.name} | {d4.name})")
     print(posterior)
@@ -364,5 +364,5 @@ def monty_hall():
 
 if __name__ == '__main__':
     # test()
-    # problem3c()
-    monty_hall()
+    problem3c()
+    # monty_hall()

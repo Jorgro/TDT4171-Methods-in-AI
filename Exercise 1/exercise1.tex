@@ -134,19 +134,43 @@
 
     % a
     \begin{punkt}
-
+        \begin{align*}
+            P(b) &=
+            P(b|a)P(a)+P(b|\neg a)P(\neg a) \\
+            &= 0.44 \\
+            \implies P(\neg b) &= 1-P(b) = 0.56
+        \end{align*}
     \end{punkt}
 
      % b
      \begin{punkt}
+        \begin{align*}
+            P(d) &=
+            P(d|b)P(b)+P(d|\neg b)P(\neg b) \\
+            &= 0.712 \\
+        \end{align*}
      \end{punkt}
 
       % c
     \begin{punkt}
+        \begin{align*}
+            P(B | \neg d)
+            &= \alpha \langle P(\neg d|b)P(b), P(\neg d | \neg b)P(\neg b) \rangle \\
+            &= \alpha \langle \frac{22}{125}, \frac{14}{125} \rangle = \langle \frac{11}{18}, \frac{7}{18}\rangle \\
+            \implies P(c|\neg d) &= P(c|b)P(b|\neg d) +  P(c|\neg b)P(\neg b|\neg d) \\
+            &= \frac{11}{180} + \frac{7}{60} = \frac{8}{45} \approx 0.178
+        \end{align*}
+        $\alpha$ is the normalizing factor.
     \end{punkt}
 
      % d
      \begin{punkt}
+        \begin{align*}
+            P(A | \neg c, d)
+            &= \alpha \langle P(a)\sum_b P(\neg b|a)P(\neg c |b) P(d|b), P(\neg a)\sum_b P(\neg b|\neg a)P(\neg c |b) P(d|b) \rangle \\
+            &= \alpha \langle \frac{11}{25}, \frac{139}{1250} \rangle = \langle \frac{550}{689}, \frac{139}{689} \rangle \approx \langle 0.7983, 0.2017 \rangle
+        \end{align*}
+        $\alpha$ is the normalizing factor.
      \end{punkt}
 \end{oppgave}
 
