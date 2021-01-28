@@ -176,29 +176,36 @@ class BayesianNetwork:
         L = [] # List with topological order
         S = [] # List of nodes with no incoming edges
 
-        edges_copy = self.edges.copy()
+        edges_copy = self.edges.copy() # using a copy of the edges to not ruin the BN
 
+        # We start off with the nodes without any incoming edges
         for node in self.variables.values():
             if not node.parents:
                 S.append(node)
 
+        # Count number of visited nodes
+        count = 0
         while S:
+            count += 1
             n = S.pop()
-            L.append(n)
-            for m in self.variables.values():
-                if m in edges_copy[n]:
-                    edges_copy[n].remove(m)
+            L.append(n) # Add it to list since it doesn't have any incoming edges
 
-                    m_has_incoming_edge = False
-
+            # Go through all edges from n
+            while edges_copy[n]:
+                    child = edges_copy[n].pop() # remove edge from n -> child
+                    # See if m still has incoming edges
+                    child_has_incoming_edge = False
                     for node in self.variables.values():
-                        if m in edges_copy[node]:
-                            m_has_incoming_edge = True
+                        if child in edges_copy[node]:
+                            child_has_incoming_edge = True
+                    # If it doesn't have any incoming edges we add it to the queue
+                    if not child_has_incoming_edge:
+                        S.append(child)
 
-                    if not m_has_incoming_edge:
-                        S.append(m)
-
-        # TODO: Error check if edges
+        # If number of visited nodes is not equal to the number of variables in graph
+        # it is not possible to topological sort the variables
+        if count != len(self.variables.values()):
+            raise RuntimeError("Cycle identified! This is not a DAG and can't be sorted.")
         return L
 
 
@@ -208,19 +215,16 @@ class InferenceByEnumeration:
         self.topo_order = bayesian_network.sorted_nodes()
 
     def _enumeration_ask(self, X, evidence):
-        # TODO: Implement Enumeration-Ask algortihm as described in Problem 4 b)
-        # Reminder:
-        # When mutable types (lists, dictionaries, etc.) are passed to functions in python
-        # it is actually passing a pointer to that variable. This means that if you want
-        # to make sure that a function doesn't change the variable, you should pass a copy.
-        # You can make a copy of a variable by calling variable.copy()
-
+        # Initialize q as a vector with as many states as the variable asked for
         q = np.zeros(self.bayesian_network.variables[X].no_states)
+
+        # Go through each possible state and find the probability by using inference by enumeration
         for i in range(self.bayesian_network.variables[X].no_states):
-            e = evidence.copy()
-            e[X] = i
+            e = evidence.copy() # Copy evidence to make sure each _enumerate_all call starts with the original evidence variables
+            e[X] = i # Set the evidence of X to the state iterated
             q[i] = self._enumerate_all(self.topo_order.copy(), e)
-            # self.bayesian_network.variables [X].table[i] =  self._enumerate_all(self.topo_order.copy(), e)
+
+        # Divide by the sum as the elements in q should sum to 1, this is due to using a normalization factor
         return q/(np.sum(q))
 
     def _enumerate_all(self, variables, evidence):
@@ -293,21 +297,25 @@ def problem3c():
     bn.add_edge(d2, d4)
 
     inference = InferenceByEnumeration(bn)
-    posterior = inference.query('A', {'D': 0, 'C': 1}) # 0 = True, 1 = False
+    posterior = inference.query('C', {'D': 1}) # 0 = True, 1 = False
 
     print(f"Probability distribution, P({d3.name} | {d4.name})")
     print(posterior)
 
 
 def monty_hall():
-    chosen_by_guest = Variable('A', 3, [[1/3], [1/3], [1/3]])
-    prize = Variable('B', 3, [[1/3], [1/3], [1/3]])
+    chosen_by_guest = Variable('A', 3, [[1/3], [1/3], [1/3]]) # The guest's first choice is chosen randomly between the 3 doors
+    prize = Variable('B', 3, [[1/3], [1/3], [1/3]]) # The prize is chosen randomly between the 3 doors
     opened_by_host = Variable('C', 3,
                         [[0.0, 0.0, 0.0, 0.5, 0.5, 1.0, 0.0, 1.0, 0.5],
                         [0.5, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5],
                         [0.5, 1.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0]],
                   parents=['A', 'B'],
                   no_parent_states=[3, 3])
+     # The host can never open the door with the prize or the one chosen by the guest, so these will always have a probability of 0
+     # The probability table for opened by host was set up using the following two cases:
+     # 1. If the same door was chosen by both guest and prize the host has two doors to chose from, giving prbability of 0.5 on each of them.
+     # 2. If different doors were chosen by the guest and prize then the host only has one door to choose from, giving probability of 1 on this door.
 
     print(f"Probability distribution, P({chosen_by_guest.name})")
     print(chosen_by_guest)
@@ -318,8 +326,8 @@ def monty_hall():
     print(f"Probability distribution, P({opened_by_host.name} | {prize.name}, {chosen_by_guest.name})")
     print(opened_by_host)
 
+    # Set up the bayesian network according to the figure 4 in the pdf
     bn = BayesianNetwork()
-
     bn.add_variable(prize)
     bn.add_variable(opened_by_host)
     bn.add_variable(chosen_by_guest)
@@ -335,6 +343,5 @@ def monty_hall():
 
 
 if __name__ == '__main__':
-    # test()
     # problem3c()
     monty_hall()
