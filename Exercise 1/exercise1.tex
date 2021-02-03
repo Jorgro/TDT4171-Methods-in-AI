@@ -110,14 +110,7 @@
             As we can see the sum is 18 numbers needed and the statement is thus \textbf{true}.
     \end{punkt}
 
-    For solving the next exercises I will use d-separation as described in \href{http://web.mit.edu/jmn/www/6.034/d-separation.pdf}{this document from MIT}. The following is a short version of the procedure paraphrased from the document:
-    \begin{enumerate}
-        \item Draw ancestral graph: Draw a graph with all variables mentioned in the statement with all of their ancestors.
-        \item Moralize the ancestral graph by "marrying" the parents: Draw a undirected edge between each pair of parents with a common child.
-        \item Disorient the graph: Replace each directed edge with an undirected edge.
-        \item Delete the givens and their edges: Remove any given variables (the evidence) and the edges connected to them.
-    \end{enumerate}
-
+    For solving the next exercises I will use d-separation as described in \href{http://web.mit.edu/jmn/www/6.034/d-separation.pdf}{this document from MIT}.
     Since d-separation is a sufficient condition for conditional independence, we can use this to determine if the statements are false or true with the given knowledge about the Bayesian network.
 
     % b
@@ -262,9 +255,9 @@
                 $Prize$ & 0 & 1 & 2 & 0 & 1 & 2 & 0 & 1 & 2 \\ [1.0ex]
                 $ChosenByGuest$ & 0 & 0 & 0 & 1 & 1 & 1 & 2& 2 & 2 \\ [1.0ex]
                 \hline
-                $Door1$ & 0 & 0 & 0 & 0.5 & 0.5 & 1 & 0 & 1  & 0.5 \\ [1.0ex]
+                $Door1$ & 0 & 0 & 0 & 0 & 0.5 & 1 & 0 & 1  & 0.5 \\ [1.0ex]
                 $Door2$ & 0.5 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0.5 \\ [1.0ex]
-                $Door3$ & 0.5 & 1 & 0 & 0.5 & 0.5 & 0 & 0 & 0 & 0 \\ [1.0ex]
+                $Door3$ & 0.5 & 1 & 0 & 1 & 0.5 & 0 & 0 & 0 & 0 \\ [1.0ex]
                 \hline
             \end{tabular}
             \caption{Probability distribution for $ChosenByGuest$.}
