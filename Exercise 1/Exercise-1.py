@@ -258,58 +258,13 @@ class InferenceByEnumeration:
         q = self._enumeration_ask(var, evidence).reshape(-1, 1)
         return Variable(var, self.bayesian_network.variables[var].no_states, q)
 
-
-def problem3c():
-    d1 = Variable('A', 2, [[0.8], [0.2]])
-    d2 = Variable('B', 2, [[0.5, 0.2],
-                           [0.5, 0.8]],
-                  parents=['A'],
-                  no_parent_states=[2])
-    d3 = Variable('C', 2, [[0.1, 0.3],
-                           [0.9, 0.7]],
-                  parents=['B'],
-                  no_parent_states=[2])
-    d4 = Variable('D', 2, [[0.6, 0.8],
-                           [0.4, 0.2]],
-                  parents=['B'],
-                  no_parent_states=[2])
-
-    print(f"Probability distribution, P({d1.name})")
-    print(d1)
-
-    print(f"Probability distribution, P({d2.name} | {d1.name})")
-    print(d2)
-
-    print(f"Probability distribution, P({d3.name} | {d2.name})")
-    print(d3)
-
-    print(f"Probability distribution, P({d4.name} | {d2.name})")
-    print(d4)
-
-    bn = BayesianNetwork()
-
-    bn.add_variable(d1)
-    bn.add_variable(d2)
-    bn.add_variable(d3)
-    bn.add_variable(d4)
-    bn.add_edge(d1, d2)
-    bn.add_edge(d2, d3)
-    bn.add_edge(d2, d4)
-
-    inference = InferenceByEnumeration(bn)
-    posterior = inference.query('C', {'D': 1}) # 0 = True, 1 = False
-
-    print(f"Probability distribution, P({d3.name} | {d4.name})")
-    print(posterior)
-
-
 def monty_hall():
     chosen_by_guest = Variable('A', 3, [[1/3], [1/3], [1/3]]) # The guest's first choice is chosen randomly between the 3 doors
     prize = Variable('B', 3, [[1/3], [1/3], [1/3]]) # The prize is chosen randomly between the 3 doors
     opened_by_host = Variable('C', 3,
-                        [[0.0, 0.0, 0.0, 0.5, 0.5, 1.0, 0.0, 1.0, 0.5],
+                        [[0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 0.0, 1.0, 0.5],
                         [0.5, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.5],
-                        [0.5, 1.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0]],
+                        [0.5, 1.0, 0.0, 1.0, 0.5, 0.0, 0.0, 0.0, 0.0]],
                   parents=['A', 'B'],
                   no_parent_states=[3, 3])
      # The host can never open the door with the prize or the one chosen by the guest, so these will always have a probability of 0
@@ -335,7 +290,7 @@ def monty_hall():
     bn.add_edge(chosen_by_guest, opened_by_host)
 
     inference = InferenceByEnumeration(bn)
-    posterior = inference.query('A', {'B': 0, 'C': 2}) # Using 0 indexing on the doors => door 0 => door 1 and door 2 => door 3
+    posterior = inference.query('B', {'A': 0, 'C': 2}) # Using 0 indexing on the doors => door 0 => door 1 and door 2 => door 3
 
     print(f"Probability distribution, P({prize.name} | {chosen_by_guest.name}, {opened_by_host.name})")
     print(posterior)
@@ -343,5 +298,4 @@ def monty_hall():
 
 
 if __name__ == '__main__':
-    # problem3c()
     monty_hall()
