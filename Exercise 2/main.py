@@ -3,23 +3,23 @@ import numpy as np
 x_0 = np.array([0.5, 0.5])
 T = np.array([[0.8, 0.3],[0.2, 0.7]])
 O = [np.array([[0.75, 0], [0, 0.2]]), np.array([[0.25, 0], [0, 0.8]])]
+evidence = np.array([None, 0, 0, 1, 0, 1, 0]) # 0 = birds nearby, 1 = no birds nearby
 
 # Umbrella example from book
 x_0 = np.array([0.5, 0.5])
 T = np.array([[0.7, 0.3],[0.3, 0.7]])
 O = np.array([np.array([[0.9, 0], [0, 0.2]]), np.array([[0.1, 0], [0, 0.8]])])
+evidence =  np.array([None, 0, 0, 1, 0, 0])
 
-
-evidence = np.array([0, 0, 1, 0, 1, 0]) # 0 = birds nearby, 1 = no birds nearby
 
 # b) Filtering:
 
 def forward(t):
-    if (t > len(evidence)):
+    if (t > len(evidence)-1):
         raise ValueError("t can't be larger than the evidence provided!") # TODO: Is this correct?
     if (t == 0):
         return x_0
-    f = O[evidence[t-1]] @ (T.transpose() @ forward(t-1))
+    f = O[evidence[t]] @ (T.transpose() @ forward(t-1))
     return f/np.sum(f)
 
 """ for i in range(1, 6):
@@ -45,17 +45,15 @@ def backward_hmm(b, ev):
     return T @ O[ev] @ b
 
 def forward_backward(evidence):
-    t = len(evidence)
+    t = len(evidence)-1
     f = forward(t) # f_t:t
     sv = np.zeros((t, 2))
     b = np.ones(2)
 
     for i in range(t, 0, -1):
         sv[i-1] = (f * b)/np.sum(f * b)
-        b = backward_hmm(b, evidence[i-1])
-        print("b: ", b)
-        print("f: ", f)
-        t_f = (np.linalg.inv(T.transpose()) @ np.linalg.inv(O[evidence[i-1]]) @ f)
+        b = backward_hmm(b, evidence[i])
+        t_f = np.linalg.inv(T.transpose()) @ np.linalg.inv(O[evidence[i]]) @ f
         f = t_f/np.sum(t_f)
     return sv
 
@@ -79,21 +77,36 @@ def forward_backward(evidence):
         b = backward(b, evidence[i-1])
     return sv """
 
-print("Smoothed result: ", forward_backward(evidence[:2]))
+print("Smoothed result: ", forward_backward(evidence))
+print()
 
 # e) Most likely sequence:
+
+# 0.8182*0.3*0.2 = 0.04909
+# 0.8182*0.7*0.9 = 0.5155
+
+
+sequence = []
+probabilities = []
 
 def viterbi(t):
     if (t > len(evidence)):
         raise ValueError("t can't be larger than the evidence provided!") # TODO: Is this correct?
-    if (t == 0):
-        return x_0
+    if (t == 1):
+        f = forward(1)
+        sequence.append(np.argmax(f))
+        probabilities.append(f[np.argmax(f)])
+        return forward(1)
 
-    sum_xt = 0
-    f_t_1 = forward(t-1)
-    for idx,p in enumerate(f_t_1):
-        sum_xt += transition_model[idx]*p
-    f = sensor_model[evidence[t-1]]*sum_xt
-    return f/np.sum(f)
+    m = viterbi(t-1)
+    xt_max = np.argmax(m)
+    k = m[xt_max] * (T @ O[evidence[t]])[xt_max]
+    sequence.append(np.argmax(k))
+    probabilities.append(k[np.argmax(k)])
 
-print("Most likely sequence: ")
+    print("k: ", k)
+    return k
+viterbi(5)
+
+print("Sequence: ", sequence)
+print("probabilities: ", probabilities)
