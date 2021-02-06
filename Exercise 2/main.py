@@ -41,14 +41,31 @@ def predict(t, k):
 
 # d) Smoothing:
 
+def backward_hmm(b, ev):
+    return T @ O[ev] @ b
 
-def backward(b, ev):
+def forward_backward(evidence):
+    t = len(evidence)
+    f = forward(t) # f_t:t
+    sv = np.zeros((t, 2))
+    b = np.ones(2)
+
+    for i in range(t, 0, -1):
+        sv[i-1] = (f * b)/np.sum(f * b)
+        b = backward_hmm(b, evidence[i-1])
+        print("b: ", b)
+        print("f: ", f)
+        t_f = (np.linalg.inv(T.transpose()) @ np.linalg.inv(O[evidence[i-1]]) @ f)
+        f = t_f/np.sum(t_f)
+    return sv
+
+""" def backward(b, ev):
     sum_xk_1 = np.zeros(2)
     for idx,p in enumerate(b):
         sum_xk_1 += sensor_model[ev][idx]*p*transition_model[idx]
-    return sum_xk_1
+    return sum_xk_1 """
 
-def forward_backward(evidence):
+""" def forward_backward(evidence):
     t = len(evidence)
     fv = np.zeros((t+1, 2))
     b = np.ones(2)
@@ -60,10 +77,9 @@ def forward_backward(evidence):
     for i in range(t, 0, -1):
         sv[i-1] = (fv[i]*b)/np.sum(fv[i]*b)
         b = backward(b, evidence[i-1])
-    return sv
+    return sv """
 
-for i in range(6):
-    print("Smoothed result: ", forward_backward(evidence[:i]))
+print("Smoothed result: ", forward_backward(evidence[:2]))
 
 # e) Most likely sequence:
 
