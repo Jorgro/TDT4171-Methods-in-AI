@@ -103,10 +103,7 @@ def viterbi(t):
     k = m[xt_max] * (T @ O[evidence[t]])[xt_max]
     sequence.append(np.argmax(k))
     probabilities.append(k[np.argmax(k)])
-
-    print("k: ", k)
     return k
 viterbi(5)
-
 print("Sequence: ", sequence)
-print("probabilities: ", probabilities)
+print("probabilities: ", np.round(probabilities, 5))
