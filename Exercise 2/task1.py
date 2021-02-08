@@ -1,15 +1,16 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 x_0 = np.array([0.5, 0.5])
-T = np.array([[0.8, 0.3],[0.2, 0.7]])
+T = np.array([[0.8, 0.2],[0.3, 0.7]])
 O = [np.array([[0.75, 0], [0, 0.2]]), np.array([[0.25, 0], [0, 0.8]])]
 evidence = np.array([None, 0, 0, 1, 0, 1, 0]) # 0 = birds nearby, 1 = no birds nearby
 
 # Umbrella example from book
-x_0 = np.array([0.5, 0.5])
-T = np.array([[0.7, 0.3],[0.3, 0.7]])
-O = np.array([np.array([[0.9, 0], [0, 0.2]]), np.array([[0.1, 0], [0, 0.8]])])
-evidence =  np.array([None, 0, 0, 1, 0, 0])
+#x_0 = np.array([0.5, 0.5])
+#T = np.array([[0.7, 0.3],[0.3, 0.7]])
+#O = np.array([np.array([[0.9, 0], [0, 0.2]]), np.array([[0.1, 0], [0, 0.8]])])
+#evidence =  np.array([None, 0, 0, 1, 0, 0])
 
 
 # b) Filtering:
@@ -22,9 +23,6 @@ def forward(t):
     f = O[evidence[t]] @ (T.transpose() @ forward(t-1))
     return f/np.sum(f)
 
-""" for i in range(1, 6):
-    print(f"Filtering t={i}: {forward(i)}") """
-
 # c) Prediction:
 
 def predict(t, k):
@@ -34,11 +32,6 @@ def predict(t, k):
     p = T.transpose() @ predict(t, k-1)
     return p/np.sum(p)
 
-""" for i in range(7, 31):
-    print(f"Prection t={i}: {predict(6, i-6)}") """
-# As t increases it goes towards [0.5, 0.5], which is to be expected as over time the evidence gives us very little and therefore it should go back
-# to the initial distribution
-
 # d) Smoothing:
 
 def backward_hmm(b, ev):
@@ -46,7 +39,7 @@ def backward_hmm(b, ev):
 
 def forward_backward(evidence):
     t = len(evidence)-1
-    f = forward(t) # f_t:t
+    f = forward(t)
     sv = np.zeros((t, 2))
     b = np.ones(2)
 
@@ -57,37 +50,60 @@ def forward_backward(evidence):
         f = t_f/np.sum(t_f)
     return sv
 
-""" def backward(b, ev):
-    sum_xk_1 = np.zeros(2)
-    for idx,p in enumerate(b):
-        sum_xk_1 += sensor_model[ev][idx]*p*transition_model[idx]
-    return sum_xk_1 """
+def plot_result():
 
-""" def forward_backward(evidence):
-    t = len(evidence)
-    fv = np.zeros((t+1, 2))
-    b = np.ones(2)
-    sv = np.zeros((t, 2))
+    t = np.array([x for x in range(1, 7)])
+    p = np.zeros(6)
+    for i in t:
+        p[i-1] = forward(i)[0]
+    plt.subplot(221)
+    plt.bar(t, p, label=r"$P(x_t | e_{1:t})$")
 
-    fv[0] = x_0
-    for i in range(1, t+1):
-        fv[i] = forward(i)
-    for i in range(t, 0, -1):
-        sv[i-1] = (fv[i]*b)/np.sum(fv[i]*b)
-        b = backward(b, evidence[i-1])
-    return sv """
 
-print("Smoothed result: ", forward_backward(evidence))
-print()
+    t = np.array([x for x in range(7, 31)])
+    p = np.zeros(31-7)
+    for i in t:
+        p[i-7] = predict(6, i-6)[0]
 
+    plt.bar(t, p, label=r"$P(x_t | e_{1:6})$")
+    plt.title("Filtered and predicted result")
+    plt.legend()
+    plt.xlabel("t")
+    plt.ylabel("probability")
+
+    # plot filtered
+    t = np.array([x for x in range(0, 6)])
+    p = np.zeros(6)
+    p[0] = x_0[0]
+    for i in t:
+        p[i] = forward(i)[0]
+    plt.subplot(223)
+    plt.title("Filtering result")
+    plt.bar(t, p, label=r"$P(x_t | e_{1:t})$")
+    plt.xlabel("t")
+    plt.ylabel("probability")
+    plt.legend()
+
+    # plot
+    t = np.array([x for x in range(0, 6)])
+    p = forward_backward(evidence)[::, 0]
+    plt.subplot(224)
+    plt.title("Smoothed result")
+    plt.bar(t, p, label=r"$P(x_t | e_{1:6})$")
+    plt.xlabel("t")
+    plt.ylabel("probability")
+    plt.legend()
+    plt.show()
+
+
+
+plot_result()
 # e) Most likely sequence:
 
 # 0.8182*0.3*0.2 = 0.04909
 # 0.8182*0.7*0.9 = 0.5155
 
 
-sequence = []
-probabilities = []
 
 def viterbi(t):
     if (t > len(evidence)):
@@ -104,6 +120,10 @@ def viterbi(t):
     sequence.append(np.argmax(k))
     probabilities.append(k[np.argmax(k)])
     return k
-viterbi(5)
-print("Sequence: ", sequence)
-print("probabilities: ", np.round(probabilities, 5))
+
+probabilities = []
+sequence = []
+
+#viterbi(5)
+#print("Sequence: ", sequence)
+#print("probabilities: ", np.round(probabilities, 5))
