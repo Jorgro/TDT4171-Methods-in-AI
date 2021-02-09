@@ -60,6 +60,7 @@ def plot_result():
     plt.bar(t, p, label=r"$P(x_t | e_{1:t})$")
 
 
+
     t = np.array([x for x in range(7, 31)])
     p = np.zeros(31-7)
     for i in t:

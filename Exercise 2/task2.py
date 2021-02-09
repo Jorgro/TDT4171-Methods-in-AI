@@ -11,11 +11,11 @@ O = [[
         [0, at[1][0]*fg[1][0]]]),
     np.array([
         [at[0][0]*fg[0][1], 0],
-        [0, at[1][0]*fg[0][1]]])
+        [0, at[1][0]*fg[1][1]]])
 ],[
     np.array([
         [at[0][1]*fg[0][0], 0],
-        [0, at[1][1]*fg[0][0]]]),
+        [0, at[1][1]*fg[1][0]]]),
     np.array([
         [at[0][1]*fg[0][1], 0],
         [0, at[1][1]*fg[1][1]]])
@@ -29,7 +29,8 @@ def forward(t):
         raise ValueError("t can't be larger than the evidence provided!") # TODO: Is this correct?
     if (t == 0):
         return x_0
-    print("O: ", O[evidence[t][0]][evidence[t][1]])
+    #print("O: ", O[evidence[t][0]][evidence[t][1]])
+    #print("evidence: ", evidence[t])
     f = O[evidence[t][0]][evidence[t][1]] @ (T.transpose() @ forward(t-1))
     return f/np.sum(f)
 
