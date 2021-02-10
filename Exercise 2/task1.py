@@ -39,15 +39,13 @@ def backward_hmm(b, ev):
 
 def forward_backward(evidence):
     t = len(evidence)-1
-    f = forward(t)
     sv = np.zeros((t, 2))
     b = np.ones(2)
 
     for i in range(t, 0, -1):
-        sv[i-1] = (f * b)/np.sum(f * b)
         b = backward_hmm(b, evidence[i])
-        t_f = np.linalg.inv(T.transpose()) @ np.linalg.inv(O[evidence[i]]) @ f
-        f = t_f/np.sum(t_f)
+        f = forward(i-1)
+        sv[i-1] = (f * b)/np.sum(f * b)
     return sv
 
 def plot_result():
@@ -58,8 +56,6 @@ def plot_result():
         p[i-1] = forward(i)[0]
     plt.subplot(221)
     plt.bar(t, p, label=r"$P(x_t | e_{1:t})$")
-
-
 
     t = np.array([x for x in range(7, 31)])
     p = np.zeros(31-7)

@@ -44,19 +44,20 @@ def predict(t, k):
 
 
 def backward_hmm(b, ev):
+    print(O[ev[0]][ev[1]])
     return T @ O[ev[0]][ev[1]] @ b
 
 def forward_backward(evidence):
     t = len(evidence)-1
-    f = forward(t) # f_t:t
     sv = np.zeros((t, 2))
     b = np.ones(2)
 
     for i in range(t, 0, -1):
-        sv[i-1] = (f * b)/np.sum(f * b)
         b = backward_hmm(b, evidence[i])
-        t_f = np.linalg.inv(T.transpose()) @ np.linalg.inv(O[evidence[i][0]][evidence[i][1]]) @ f
-        f = t_f/np.sum(t_f)
+        f = forward(i-1)
+        print("f: ", f)
+        print("b: ", b)
+        sv[i-1] = (f * b)/np.sum(f * b)
     return sv
 # b)
 
