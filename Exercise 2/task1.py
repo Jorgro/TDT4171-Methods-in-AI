@@ -41,7 +41,6 @@ def forward_backward(evidence):
     t = len(evidence)-1
     sv = np.zeros((t, 2))
     b = np.ones(2)
-
     for i in range(t, 0, -1):
         b = backward_hmm(b, evidence[i])
         f = forward(i-1)

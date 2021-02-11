@@ -55,8 +55,6 @@ def forward_backward(evidence):
     for i in range(t, 0, -1):
         b = backward_hmm(b, evidence[i])
         f = forward(i-1)
-        print("f: ", f)
-        print("b: ", b)
         sv[i-1] = (f * b)/np.sum(f * b)
     return sv
 # b)
