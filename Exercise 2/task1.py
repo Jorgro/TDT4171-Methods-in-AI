@@ -35,17 +35,47 @@ def predict(t, k):
 # d) Smoothing:
 
 def backward_hmm(b, ev):
-    return T @ O[ev] @ b
+    if ev == None:
+        return 0
+
+    temp = T.transpose() @ O[ev] @ b
+    return (temp)/np.sum(temp)
 
 def forward_backward(evidence):
     t = len(evidence)-1
-    sv = np.zeros((t, 2))
+    sv = np.zeros((len(evidence), 2))
     b = np.ones(2)
-    for i in range(t, 0, -1):
-        b = backward_hmm(b, evidence[i])
-        f = forward(i-1)
+    for i in range(t, -1, -1):
+        f = forward(i)
         sv[i-1] = (f * b)/np.sum(f * b)
-    return sv
+        b = backward_hmm(b, evidence[i])
+    return sv[::-1]
+
+
+# e) Most likely sequence:
+
+def viterbi(t):
+    if (t > len(evidence)):
+        raise ValueError("t can't be larger than the evidence provided!") # TODO: Is this correct?
+    if (t == 1):
+        f = forward(1)
+        sequence.append(np.argmax(f))
+        probabilities.append(f[np.argmax(f)])
+        return forward(1)
+
+    m = viterbi(t-1)
+    xt_max = np.argmax(m)
+    k = m[xt_max] * (T @ O[evidence[t]])[xt_max]
+    sequence.append(np.argmax(k))
+    probabilities.append(k[np.argmax(k)])
+    return k
+
+probabilities = []
+sequence = []
+
+#viterbi(6)
+#print("Sequence: ", sequence)
+#print("probabilities: ", np.round(probabilities, 5))
 
 def plot_result():
 
@@ -80,9 +110,9 @@ def plot_result():
     plt.ylabel("probability")
     plt.legend()
 
-    # plot
+    # plot smoothed
     t = np.array([x for x in range(0, 6)])
-    p = forward_backward(evidence)[::, 0]
+    p = forward_backward(evidence)[0:6:, 0]
     plt.subplot(224)
     plt.title("Smoothed result")
     plt.bar(t, p, label=r"$P(x_t | e_{1:6})$")
@@ -90,36 +120,4 @@ def plot_result():
     plt.ylabel("probability")
     plt.legend()
     plt.show()
-
-
-
 plot_result()
-# e) Most likely sequence:
-
-# 0.8182*0.3*0.2 = 0.04909
-# 0.8182*0.7*0.9 = 0.5155
-
-
-
-def viterbi(t):
-    if (t > len(evidence)):
-        raise ValueError("t can't be larger than the evidence provided!") # TODO: Is this correct?
-    if (t == 1):
-        f = forward(1)
-        sequence.append(np.argmax(f))
-        probabilities.append(f[np.argmax(f)])
-        return forward(1)
-
-    m = viterbi(t-1)
-    xt_max = np.argmax(m)
-    k = m[xt_max] * (T @ O[evidence[t]])[xt_max]
-    sequence.append(np.argmax(k))
-    probabilities.append(k[np.argmax(k)])
-    return k
-
-probabilities = []
-sequence = []
-
-#viterbi(5)
-#print("Sequence: ", sequence)
-#print("probabilities: ", np.round(probabilities, 5))
