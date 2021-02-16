@@ -62,18 +62,10 @@ def viterbi2():
 
     T_1[:, 0] = forward(1)
     for j in range(1, len(evidence)-1):
-        print("O: ", O[evidence[j]])
-        for i in range(N):
-            print("HellO: ", [T_1[k, j-1]*(O[evidence[j+1]][i,i] * T[k, i]) for k in range(2)])
-            k = np.argmax([T_1[k, j-1]*(O[evidence[j+1]][i,i] * T[k, i]) for k in range(2)])
-            T_1[i, j] = T_1[k, j-1]*(O[evidence[j+1]][i,i] * T[k,i])
-            print("T1: ", T_1[k, j-1])
-            print("O: ", O[evidence[j]][i,i])
-            print("T: ", T[k,i])
-            print("Equals: ", T_1[k, j-1]*(O[evidence[j+1]][i,i] * T[k,i]))
-            T_2[i, j] = k
-    print("T1: ", T_1)
-    print("T2: ", T_2)
+        p = T_1[:, j-1]*(O[evidence[j+1]] @ T.transpose())
+        T_1[:,j] = np.max(p, 1)
+        T_2[:,j] = np.argmax(p, 1)
+
     sequence = np.zeros(K)
     sequence[K-1] = np.argmax(T_1[:, K-1])
 
@@ -86,30 +78,6 @@ def viterbi2():
 
 
 print(viterbi2())
-
-
-
-def viterbi(t):
-    if (t == 1):
-        f = forward(1)
-        sequence.append(np.argmax(f))
-        probabilities.append(f[np.argmax(f)])
-        return f
-
-    m = viterbi(t-1)
-    xt_max = np.argmax(m)
-    k = m[xt_max] * (O[evidence[t]] @ T[xt_max])
-    #k = k/np.sum(k)
-    sequence.append(np.argmax(k))
-    probabilities.append(k)
-    return k
-
-probabilities = []
-sequence = []
-
-#viterbi(6)
-#print("Sequence: ", sequence)
-#print("probabilities: ", probabilities)
 
 def plot_filtering():
     t = np.array([x for x in range(1, 7)])
