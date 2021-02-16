@@ -42,21 +42,25 @@ def predict(t, k):
     p = T.transpose() @ predict(t, k-1)
     return p/np.sum(p)
 
-
 def backward_hmm(b, ev):
-    print(O[ev[0]][ev[1]])
-    return T @ O[ev[0]][ev[1]] @ b
+    if ev[0] == None:
+        return 0
+
+    temp = T @ O[ev[0]][ev[1]] @ b
+    return temp
 
 def forward_backward(evidence):
     t = len(evidence)-1
-    sv = np.zeros((t, 2))
+    sv = np.zeros((len(evidence), 2))
     b = np.ones(2)
-
-    for i in range(t, 0, -1):
+    for i in range(t, -1, -1):
+        f = forward(i)
+        print("f: ", f)
+        print("b: ", b)
+        sv[i] = (f * b)/np.sum(f * b)
         b = backward_hmm(b, evidence[i])
-        f = forward(i-1)
-        sv[i-1] = (f * b)/np.sum(f * b)
     return sv
+
 # b)
 
 for i in range(0, 5):

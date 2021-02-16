@@ -3,9 +3,6 @@
 from collections import defaultdict
 from functools import reduce
 
-from agents import Agent
-from utils import *
-
 
 def DTAgentProgram(belief_state):
     """
@@ -228,69 +225,6 @@ class DecisionNetwork(BayesNet):
             u += prob_dist[item] * self.get_utility(action, item)
 
         return u
-
-
-class InformationGatheringAgent(Agent):
-    """
-    [Figure 16.9]
-    A simple information gathering agent. The agent works by repeatedly selecting
-    the observation with the highest information value, until the cost of the next
-    observation is greater than its expected benefit."""
-
-    def __init__(self, decnet, infer, initial_evidence=None):
-        """decnet: a decision network
-        infer: the preferred method to carry out inference on the given decision network
-        initial_evidence: initial evidence"""
-        self.decnet = decnet
-        self.infer = infer
-        self.observation = initial_evidence or []
-        self.variables = self.decnet.nodes
-
-    def integrate_percept(self, percept):
-        """Integrate the given percept into the decision network"""
-        raise NotImplementedError
-
-    def execute(self, percept):
-        """Execute the information gathering algorithm"""
-        self.observation = self.integrate_percept(percept)
-        vpis = self.vpi_cost_ratio(self.variables)
-        j = max(vpis)
-        variable = self.variables[j]
-
-        if self.vpi(variable) > self.cost(variable):
-            return self.request(variable)
-
-        return self.decnet.best_action()
-
-    def request(self, variable):
-        """Return the value of the given random variable as the next percept"""
-        raise NotImplementedError
-
-    def cost(self, var):
-        """Return the cost of obtaining evidence through tests, consultants or questions"""
-        raise NotImplementedError
-
-    def vpi_cost_ratio(self, variables):
-        """Return the VPI to cost ratio for the given variables"""
-        v_by_c = []
-        for var in variables:
-            v_by_c.append(self.vpi(var) / self.cost(var))
-        return v_by_c
-
-    def vpi(self, variable):
-        """Return VPI for a given variable"""
-        vpi = 0.0
-        prob_dist = self.infer(variable, self.observation, self.decnet).prob
-        for item, _ in prob_dist.items():
-            post_prob = prob_dist[item]
-            new_observation = list(self.observation)
-            new_observation.append(item)
-            expected_utility = self.decnet.get_expected_utility(variable, new_observation)
-            vpi += post_prob * expected_utility
-
-        vpi -= self.decnet.get_expected_utility(variable, self.observation)
-        return vpi
-
 
 class BayesNode:
     """A conditional probability distribution for a boolean variable,
