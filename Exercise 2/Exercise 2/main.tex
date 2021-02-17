@@ -157,22 +157,14 @@ The sensor model $\textbf{O}_t$ depends on the evidence given:
 
 \begin{punkt}
     This kind of operation is most likely sequence, where we calculate the most like sequence of states given all the evidence up to the present.
-    The results where the states given in Table \ref{tab:4}.
+    The results where the sequence given in Figure \ref{fig:viterbi}.
 
-    \begin{table}[H]
+    \begin{figure}[H]
         \centering
-        \begin{tabular}{|c|c|}
-            \hline
-           \multicolumn{2}{|c|}{$P(X_0)$} \\ [0.5ex]
-            \hline
-            $t$ & $f$ \\
-            \hline
-            0.5 & 0.5 \\ [1.0ex]
-            \hline
-    \end{tabular}
-        \caption{Probability distribution for $P(X_0)$.}
-        \label{tab:4}
-    \end{table}
+        \includegraphics[width=1.0\textwidth]{viterbi.png}
+        \caption{Viterbi sequence for $t = 1,...,6$.}
+        \label{fig:viterbi}
+    \end{figure}
 \end{punkt}
 
 \end{oppgave}
