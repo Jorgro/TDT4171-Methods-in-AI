@@ -123,6 +123,8 @@ def viterbi():
     for j in range(K-1, 0, -1):
         sequence[j-1] = T_2[int(sequence[j]), j] # find the path using T_2 which has the most likely path to that state
 
+    print("T_1: ", T_1)
+    print("T_2: ", T_2)
     return sequence
 
 # The following functions are used to plot the results
@@ -167,7 +169,7 @@ def plot_smoothing():
     plt.show()
 
 if __name__ == '__main__':
-    plot_filtering()
-    plot_prediction()
-    plot_smoothing()
+    #plot_filtering()
+    #plot_prediction()
+    #plot_smoothing()
     print("Most likely sequence for the evidence given: ", viterbi())
