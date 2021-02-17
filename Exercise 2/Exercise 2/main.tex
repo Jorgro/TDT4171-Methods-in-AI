@@ -125,6 +125,9 @@ The sensor model $\textbf{O}_t$ depends on the evidence given:
         \label{fig:filtering}
     \end{figure}
 
+    As we can see the filtering results vary with the evidence, when we observe birds nearby the probability of fish nearby is also high, while when there are no birds nearby
+    the probability of fish nearby is lower, which makes sense from the transition and sensor model.
+
 \end{punkt}
 
 \begin{punkt}
@@ -154,6 +157,10 @@ The sensor model $\textbf{O}_t$ depends on the evidence given:
         \caption{Smoothing for $t = 0,...,5$.}
         \label{fig:smoothing}
     \end{figure}
+
+    As we can see the smoothed results gives a higher probability of fish nearby when there are no birds nearby than filtering.
+    For example on day 3 the smoothed result is 0.598 while the filtered is 0.485, this is because the birds nearby on day 4 makes it more
+    likely to be fish nearby on day 3 since fish nearby tends to persist.
 \end{punkt}
 
 \begin{punkt}
@@ -166,6 +173,9 @@ The sensor model $\textbf{O}_t$ depends on the evidence given:
         \caption{Viterbi sequence for $t = 1,...,6$.}
         \label{fig:viterbi}
     \end{figure}
+
+    So even though we had evidence of no birds nearby on two of the days, the most likely sequence is that all days had fish nearby.
+    This happens because the Viterbi algorithm takes into account the join probabilities over all the time steps.
 \end{punkt}
 
 \end{oppgave}
