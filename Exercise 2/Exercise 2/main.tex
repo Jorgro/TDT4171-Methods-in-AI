@@ -174,8 +174,10 @@ The sensor model $\textbf{O}_t$ depends on the evidence given:
         \label{fig:viterbi}
     \end{figure}
 
-    So even though we had evidence of no birds nearby on two of the days, the most likely sequence is that all days had fish nearby.
-    This happens because the Viterbi algorithm takes into account the join probabilities over all the time steps.
+    We see that the most likely sequence for $X_6 = FishNearby$ is the sequence of
+    $0, 0, 0, 0, 0$ for $t=1,...,5$ respectively, while the most likely sequence for
+    $X_6=NoFishNearby$ is the sequence $0, 0, 0, 0, 1$. (Here $0=FishNearby,\;1=NoFishNearby$.)
+    We see that the algorithm choose $X_6 = FishNearby$ as this has a higher probability.
 \end{punkt}
 
 \end{oppgave}
