@@ -67,7 +67,7 @@ def backward(b, ev):
         Numpy array (vector) for this backward value
     """
     # Used to handle the case if evidence is equal to None, which will happen at the last iteration in forward-backward
-    # the return of 0 doesn't matter as the backward value is not used
+    # the return of 0 doesn't matter as the backward value is not used for this case
     if ev == None:
         return 0
 
@@ -169,7 +169,7 @@ def plot_smoothing():
     plt.show()
 
 if __name__ == '__main__':
-    #plot_filtering()
-    #plot_prediction()
-    #plot_smoothing()
+    plot_filtering()
+    plot_prediction()
+    plot_smoothing()
     print("Most likely sequence for the evidence given: ", viterbi())
