@@ -4,18 +4,25 @@ import matplotlib.pyplot as plt
 x_0 = np.array([0.5, 0.5])
 T = np.array([[0.8, 0.2],[0.3, 0.7]])
 O = [np.array([[0.75, 0], [0, 0.2]]), np.array([[0.25, 0], [0, 0.8]])]
-evidence = np.array([None, 0, 0, 1, 0, 1, 0]) # 0 = birds nearby, 1 = no birds nearby
+evidence = np.array([None, 0, 0, 1, 0, 1, 0]) # 0 = birds nearby, 1 = no birds nearby, None at start to simplify indexing
 
-N = len(evidence)-1 # correct length of evidence
-# Umbrella example from book
+# Umbrella example from book used for debugging
 #x_0 = np.array([0.5, 0.5])
 #T = np.array([[0.7, 0.3],[0.3, 0.7]])
 #O = np.array([np.array([[0.9, 0], [0, 0.2]]), np.array([[0.1, 0], [0, 0.8]])])
 #evidence =  np.array([None, 0, 0, 1, 0, 0])
 
+N = len(evidence)-1 # correct length of evidence, minus 1 since we added None at the start to simplify the indexing
+
 # b) Filtering:
 
 def forward():
+    """
+    Implements the forward equation 15.12 from AIMA with evidence, will only filter as long as there is evidence
+
+    Returns:
+        Numpy array of the filtered distribution of state at time = index
+    """
     f = np.zeros((N+1, 2))
     f[0] = x_0 # filtering at t=0 is just the initial distribution
 
@@ -24,65 +31,102 @@ def forward():
         f[i] = O[evidence[i]] @ T.transpose() @ f[i-1] # implement equation 15.12 from AIMA (Artifical Intelligence - A Modern Approach)
         f[i] = f[i]/np.sum(f[i]) # normalize
     return f
+
 # c) Prediction:
 
-def predict(t, k):
+def predict(k):
+    """
+    Implements the forward equation 15.12 from AIMA without any new evidence
 
-    # base case in recursion is just filtering on last step
-    if (k == 0):
-        return forward(t)
+    Args:
+        k: How far it should predict into the future
 
-    # use equation 15.12 from AIMA, but without evidence
-    p = T.transpose() @ predict(t, k-1)
-    return p/np.sum(p) # normalize vector
+    Returns:
+        Numpy array of the predicted distribution of state at time = index
+    """
+
+    f = np.zeros((k+1, 2))
+    f[0] = forward()[-1] # using the latest filtering (with evidence) as start
+
+    for i in range(1, k+1):
+        f[i] = T.transpose() @ f[i-1] # forward update as in equation 15.12, but without any evidence as we are predicting
+        f[i] = f[i]/np.sum(f[i]) # normalize
+    return f
 
 # d) Smoothing:
 
-def backward_hmm(b, ev):
+def backward(b, ev):
+    """
+    Implements the backward equation 15.13 from AIMA
+
+    Args:
+        b: The previous backward value
+        ev: The evidence at this time step
+
+    Returns:
+        Numpy array (vector) for this backward value
+    """
+    # Used to handle the case if evidence is equal to None, which will happen at the last iteration in forward-backward
+    # the return of 0 doesn't matter as the backward value is not used
     if ev == None:
         return 0
 
-    temp = T @ O[ev] @ b
-    return temp
+    return  T @ O[ev] @ b # backward update as in equation 15.13
 
-def forward_backward(evidence):
-    t = len(evidence)-1
-    sv = np.zeros((len(evidence), 2))
+def forward_backward():
+    """
+    Implements the forward-backward algoruthm from AIMA
+
+    Returns:
+        Numpy array of the smoothed distributions
+    """
+
+    sv = np.zeros((N+1, 2))
     b = np.ones(2)
-    for i in range(t, -1, -1):
-        f = forward(i)
-        sv[i] = (f * b)/np.sum(f * b)
-        b = backward_hmm(b, evidence[i])
+    f = forward() # get the forward values
+    for i in range(N, -1, -1):
+        sv[i] = (f[i] * b)/np.sum(f[i] * b) # calculate the smoothed distrubution  from equation 15.8
+        b = backward(b, evidence[i]) # calculate new backward value
     return sv
 
 
 
 # e) Most likely sequence:
 
-def viterbi2():
-    K = len(evidence)-1
-    N = 2
-    T_1 = np.zeros((N, K))
-    T_2 = np.zeros((N, K))
+def viterbi():
+    """
+    Implementation of the Viterbi algorithm
+    This implementation uses the pseudocode from wikipedia (https://en.wikipedia.org/wiki/Viterbi_algorithm#Pseudocode)
+    with some simplifications using matrices in numpy
 
-    T_1[:, 0] = forward()[1]
+    Returns:
+        The most likely sequence of states for the evidence
+    """
+
+    K = len(evidence)-1 # number of evidence given
+    N = 2 # number of states
+    T_1 = np.zeros((N, K)) # stores the probabilities of most likely paths so far (not normalized except for first element)
+    T_2 = np.zeros((N, K)) # stores the most likely path so far to the state
+
+    T_1[:, 0] = forward()[1] # first element is just the forward for t=1
+
+    # go through evidence
     for j in range(1, len(evidence)-1):
-        p = T_1[:, j-1]*(O[evidence[j+1]] @ T.transpose())
-        T_1[:,j] = np.max(p, 1)
-        T_2[:,j] = np.argmax(p, 1)
+        p = T_1[:, j-1]*(O[evidence[j+1]] @ T.transpose()) # implement equation 15.11 without maximization
+        T_1[:,j] = np.max(p, 1) # find the max probability
+        T_2[:,j] = np.argmax(p, 1) # find the state that maximizes this probability
 
-    sequence = np.zeros(K)
-    sequence[K-1] = np.argmax(T_1[:, K-1])
+    sequence = np.zeros(K) # used to store the sequence of states
+    sequence[K-1] = np.argmax(T_1[:, K-1]) # find the most like state at the end
 
+    # go backward from the most likely state at the end to find the path
     for j in range(K-1, 0, -1):
-        sequence[j-1] = T_2[int(sequence[j]), j]
+        sequence[j-1] = T_2[int(sequence[j]), j] # find the path using T_2 which has the most likely path to that state
 
 
     return sequence
 
-
-
-print(viterbi2())
+# The following functions are used to plot the results
 
 def plot_filtering():
     t = np.array([x for x in range(1, 7)])
@@ -102,9 +146,7 @@ def plot_filtering():
 def plot_prediction():
     t = np.array([x for x in range(7, 31)])
     p = np.zeros(31-7)
-    for i in t:
-        p[i-7] = predict(6, i-6)[0]
-
+    p = predict(30)[1:25,0]
     plt.bar(t, p, label=r"$P(x_t | e_{1:6})$")
     plt.title("Predicted result")
     plt.legend()
@@ -114,7 +156,7 @@ def plot_prediction():
 
 def plot_smoothing():
     t = np.array([x for x in range(0, 6)])
-    p = np.round(forward_backward(evidence)[0:6:, 0],3)
+    p = np.round(forward_backward()[0:6:, 0],3)
     plt.title("Smoothed result")
     plt.bar(t, p, label=r"$P(x_t = FishNearby | e_{1:6})$")
     plt.xlabel("t")
@@ -125,6 +167,8 @@ def plot_smoothing():
         plt.text(xlocs[i]-0.25, v-0.05, str(v), color="white")
     plt.show()
 
-plot_filtering()
-#plot_prediction()
-#plot_smoothing()
+if __name__ == '__main__':
+    plot_filtering()
+    plot_prediction()
+    plot_smoothing()
+    print("Most likely sequence for the evidence given: ", viterbi())
