@@ -123,7 +123,6 @@ def viterbi():
     for j in range(K-1, 0, -1):
         sequence[j-1] = T_2[int(sequence[j]), j] # find the path using T_2 which has the most likely path to that state
 
-
     return sequence
 
 # The following functions are used to plot the results
