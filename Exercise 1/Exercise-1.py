@@ -246,7 +246,6 @@ class InferenceByEnumeration:
                 e = evidence.copy()
                 e[Y.name] = i
                 sum_over_y += Y.probability(e[Y.name], e)*self._enumerate_all(v, e)
-
             return sum_over_y
 
 
@@ -295,7 +294,21 @@ def monty_hall():
     print(f"Probability distribution, P({prize.name} | {chosen_by_guest.name}, {opened_by_host.name})")
     print(posterior)
 
+def exercise3():
+    B = Variable('A', 2, [[0.5], [0.5]])
+    M = Variable('B', 2, [[0.9, 0.65], [0.1, 0.35]], parents=['A'], no_parent_states=[2])
+    P = Variable('C', 2, [[0.9, 0.4, 0.7, 0.2], [0.1, 0.6, 0.3, 0.8]], parents=['B', 'A'], no_parent_states=[2, 2])
 
-
+    bn = BayesianNetwork()
+    bn.add_variable(M)
+    bn.add_variable(P)
+    bn.add_variable(B)
+    bn.add_edge(B, M)
+    bn.add_edge(B, P)
+    bn.add_edge(M, P)
+    inference = InferenceByEnumeration(bn)
+    posterior = inference.query('C', {'A': 1})
+    print(posterior)
 if __name__ == '__main__':
-    monty_hall()
+    #monty_hall()
+    exercise3()
