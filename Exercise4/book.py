@@ -11,12 +11,12 @@ def B(q):
     return -(q*np.log2(q)+(1-q)*np.log2(1-q))
 
 def gain(A, examples):
-    p = examples['Survived'].value_counts()[1]
-    n_p_sum = examples['Survived'].size
+    p = examples['WillWait'].value_counts()[1]
+    n_p_sum = examples['WillWait'].size
     return B(p/n_p_sum) - remainder(A, examples, n_p_sum)
 
 def remainder(A, examples, n_p_sum):
-    k = examples.groupby([A])['Survived'].value_counts()
+    k = examples.groupby([A])['WillWait'].value_counts()
     s = 0
     for i in examples[A].unique():
         try:
@@ -34,8 +34,8 @@ def remainder(A, examples, n_p_sum):
     return s/n_p_sum
 
 def check_same_classification(examples):
-    if examples['Survived'].nunique() == 1:
-        return True, examples['Survived'].unique()[0]
+    if examples['WillWait'].nunique() == 1:
+        return True, examples['WillWait'].unique()[0]
     else:
         return False, NaN
 
@@ -62,12 +62,12 @@ class DT():
 
         for key, val in tree.labels.items():
             dot.node(str(tree.name)+str(counter[tree.name]), str(tree.name))
-
+            print(val)
             if val == 1:
-                dot.node(str(val)+str(counter[val]), 'Survived')
+                dot.node(str(val)+str(counter[val]), 'Yes')
                 dot.edge(str(tree.name)+str(counter[tree.name]), str(val)+str(counter[val]), str(key))
             elif val == 0:
-                dot.node(str(val)+str(counter[val]), 'Died')
+                dot.node(str(val)+str(counter[val]), 'No')
                 dot.edge(str(tree.name)+str(counter[tree.name]), str(val)+str(counter[val]), str(key))
             else:
                 dot.node(str(val.name)+str(counter[val.name]), str(val.name))
@@ -85,10 +85,10 @@ class DT():
 counter = {
     0: 0,
     1: 0,
-    "Embarked": 0,
-    "Sex": 0,
-    "Parc": 0,
-    "SibSp": 0,
+    "Patrons": 0,
+    "Hungry": 0,
+    "Type": 0,
+    "Fri": 0,
     "Age": 0,
     "Name": 0,
     "Cabin": 0,
@@ -106,7 +106,7 @@ def DTL(examples, attributes, parent_examples):
 
     truth_val, classification = check_same_classification(examples)
     if not examples.shape[0]:
-        k = parent_examples.Survived.value_counts()
+        k = parent_examples.WillWait.value_counts()
 
         try:
             p_i = k[1]
@@ -126,7 +126,7 @@ def DTL(examples, attributes, parent_examples):
         return classification
 
     elif not attributes:
-        k = examples.Survived.value_counts()
+        k = examples.WillWait.value_counts()
 
         try:
             p_i = k[1]
@@ -163,7 +163,7 @@ def test(DT, test_data):
     correct = 0
     for i in range(test_data.shape[0]):
         DT.classify(test_data.iloc[i])
-        if DT.classify(test_data.iloc[i]) == test_data.iloc[i]['Survived']:
+        if DT.classify(test_data.iloc[i]) == test_data.iloc[i]['WillWait']:
             correct += 1
     print(correct)
     print(correct/test_data.shape[0])
@@ -171,31 +171,17 @@ def test(DT, test_data):
 
 if __name__=='__main__':
 
-    training_data = pd.read_csv('Exercise4/train.csv')
+    training_data = pd.read_csv('Exercise4/book.csv')
 
     training_data = training_data.dropna() # drop all rows with na data
     attributes = list(training_data.columns.values)
-    attributes.remove('Survived')
-    # Continuous attributes
-    attributes.remove('Name')
-    attributes.remove('Age')
-    attributes.remove('Cabin')
-    attributes.remove('Ticket')
-    attributes.remove('Fare')
-    # Discrete attributes
-    #attributes.remove('SibSp')
-    #attributes.remove('Parch')
-    attributes.remove("Embarked")
-    attributes.remove("Pclass")
-    #attributes.remove("Sex")
+    attributes.remove('WillWait')
 
-    test_data = pd.read_csv('Exercise4/test.csv')
+    test_data = pd.read_csv('Exercise4/book.csv')
 
     dot = Digraph(comment='Network')
     DT = DTL(training_data, attributes, [])
     DT.graph_tree(DT, dot)
     dot.save('test.gv')
     dot.render('test.gv', view=True)
-
-    test(DT, test_data)
 
