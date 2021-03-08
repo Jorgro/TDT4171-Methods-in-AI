@@ -16,6 +16,8 @@
 \fag{Methods in Artificial Intelligence \\ TDT4171}
 \institutt{Department for Computer Science}
 
+\addbibresource{references.bib}
+
 \begin{document}
 
 
@@ -26,7 +28,7 @@
     \begin{punkt}
         The decision network can be drawn with decision node $B$ influencing
         $P$ and $M$, $P$ goes into utility node $U_1$, $B$ goes into utility node $U_2$,
-        both of these are then again combined into the overall utility node $U$.
+        both of these are then again combined into the overall addutility node $U$.
 
         \begin{figure}[H]
             \centering
@@ -72,6 +74,9 @@
 
         Since the expected utility for choosing $B=true$ is higher than $B=false$,
         Geir should buy the book.
+
+        It should be noted that I did not have to calculate $P(\neg P)$ since the utility for this is
+        just 0.
     \end{punkt}
 \end{oppgave}
 \clearpage
@@ -81,25 +86,29 @@
     \section{Overall model and decision nodes}
     I want to make a decision network for first deciding if I should buy a plane ticket today, and then at the beginning of
     the Easter-holiday decide if I should travel home. It is allowed for me to buy a ticket and not go home. It is also allowed for me
-    to go home in the Easter-holiday even if I didn't buy a ticket today, since I can still buy a ticket, although at a lot higher cost (probably).
+    to go home in the Easter-holiday even if I didn't buy a ticket today, since I can still buy a ticket, although at a lot higher cost as plane tickets are
+    a lot more expensive close to departure.
 
     In order to decide on these two non-trivial decisions I have modelled how the decisions are influenced observations such as prices on ticket, different corona restrictions, my physical and mental wellbeing,
-    how much school work I get done, how they will affect the grades and more.. The overall model is shown in Figure \ref{fig:2}.
+    how much school work I get done, how they will affect the grades and more. The full decision network is shown in Figure \ref{fig:2}.
 
     \begin{figure}[H]
         \centering
         \includegraphics[width=\textwidth]{Task3_2.png}
         \label{fig:2}
-        \caption{Decision network for Task 2.}
+        \caption{Decision network for choosing if I should buy tickets today and travel home in Easter.}
     \end{figure}
 
-    Now I will go through the thought process behind setting up this complete model and with probability distributions.
+    Now I will go through the thought process behind setting up this complete model and the probability distributions.
 
     \subsection{How I chose probabilities}
     Choosing how I should assign probabilities was one of the most challenging in this task.
     I decided to use the "fuzzy-logic" approach, by trying to use abstract terms from our language and convert it to a specific
-    probability. Whenever I use any of these abstract terms in the text, it is matched with the probability shown
-    in Table \ref{tab:prob}
+    probability. This made sense for this model since for most of these uncertain nodes I thought of these in terms like "very high", "probably" etc.
+
+
+    Whenever I use any of these abstract terms in the text, it is matched with the probability shown
+    in Table \ref{tab:prob}.
 
     \begin{table}[H]
         \centering
@@ -117,9 +126,13 @@
             Small & $0.3$   \\ [1.0ex]
             Large & $0.7$   \\ [1.0ex]
             Decent & $0.6$   \\ [1.0ex]
+            Probably & $0.8$   \\ [1.0ex]
+            Less probable & $0.4$   \\ [1.0ex]
             \hline
     \end{tabular}
-        \caption{Probabilities for some different abstract terms. }
+        \caption{Non-exhaustive list of the probabilities for abstract terms. The probabilities were chosen
+        by myself, and other people would probably have different interpretations of the probabilities of these words. In this decision network
+        which is created for myself it should not matter that much, as it would for a doctor using decision network on his/her patients.}
         \label{tab:prob}
     \end{table}
 
@@ -129,6 +142,10 @@
     These probabilities should also be tuned depending on the results I would have gotten with my decision network,
     but I did not do any such analysis as it were not a requirement for the task.
 
+    For better probabilities calibration techniques like the \textbf{Almanac Game}, by using for example data
+    from 2020 about the corona restrictions then. However, as most of these uncertainties do not have any data to back the estimates
+    it would be very hard to quantify how good my numerical estimates are. This is one of the major weaknesses my decision network has, compared
+    to if I were to model a decision network with better data available.
 
     \subsection{Observational nodes}
 
@@ -139,25 +156,27 @@
         \item $PricesToday$
     \end{itemize}
 
-    Each of these have two discrete states (for simplicity to not make the model overcomplicated):
+    Each of these have two discrete states which from my observations made the most sense:
     \begin{enumerate}
         \item $High$
         \item $Low$
     \end{enumerate}
 
-    $TravelRestrictionsToday$ are here more for the whole country, like when the government told students to not travel to their university for example.
-    $SocialRestrictionsToday$ are more local and about how open the city is.
-
-    These were chosen as these are the most influential on my decision to travel, and they influence other nodes in the network.
+    $TravelRestrictionsToday$ are here more for the whole country. A $High$ state would mean for example like when the government recommended students to stay at home \cite{vg}.
+    $SocialRestrictionsToday$ are more local and about how open the city is, a $High$ state here would for example mean when pubs are closed, training centers are closed etc.
+    These were chosen as these are the most influential on my decision to travel, and they influence other nodes in the network which will be explained later.
 
     The observations before the second decision ($TravelHomeEaster$):
     \begin{itemize}
         \item $TravelRestrictionsEaster$
         \item $SocialRestrictionsEaster$
+        \item $BuyTicketsToday$: Although a decision node, it is still observable for this second decision node.
     \end{itemize}
 
     These are not observed until after the first decision and for calculational properties we must assign a CPT to each. They are also influenced
-    by the previous observations as this makes a lot of sense, as higher restrictions now will make it less probable to have restrictions later.
+    by the previous observations as this makes a lot of sense, as higher restrictions now will make it less probable to have restrictions later since
+    the infection rates are going down with more restrictions.
+
     The CPTs can be found in Table \ref{tab:obs1} and \ref{tab:obs2}.
 
     \begin{table}[H]
@@ -182,7 +201,7 @@
             \hline
             $SocialRestrictionsToday$ & $P(SocialRestrictionsEaster=High)$ \\ [0.5ex]
             \hline
-            $High$ & 0.3  \\ [1.0ex]
+            $High$ & 0.4  \\ [1.0ex]
             $Low$ & 0.6 \\
             \hline
     \end{tabular}
@@ -190,11 +209,15 @@
         \label{tab:obs2}
     \end{table}
 
+    It should be noted that the restriction nodes are \textit{very} simplified as how infection spreads in a population are very sophisticated dynamics, which I have no hope to
+    model accurately in this comparatively simple task. These numbers chosen are therefore estimated based on my own opinions and should be tuned by experts in the field.
+
 
     \subsection{Uncertain non-observational nodes}
     The decision of travelling home is the decision which influences most of the non-observational uncertain nodes.
-    As I want to measure the utility as a function of overall wellbeing and the monetary value (e.g. money spent), the uncertain nodes
-    is a way to see how the decision and evidence influences my overall wellbeing.
+    As I want to measure the utility as a function of overall wellbeing, the monetary value (e.g. money spent) and my grade utility, the uncertain nodes
+    is a way to see how the decision and evidence influences my overall wellbeing and how they affect my grades. The monetary utility is only influenced by my decision nodes and the
+    prices given as evidence.
 
     I have tried doing this by setting up the uncertain nodes:
     \begin{itemize}
@@ -246,9 +269,6 @@
         \caption{Probability distribution for $TrainAtGym$.}
         \label{tab:TAG}
 \end{table}
-
-
-
 
 \begin{table}[H]
     \begin{tabular}{|c|c|c|c|c|}
@@ -344,11 +364,10 @@ Due to limitations of space I did not include every CPT.
         \label{tab:WU}
     \end{table}
 
-    These utility functions have \textit{not} been tuned in any way as I did not have the means to test my decision network, so the
+    These utility functions have \textit{not} been tuned in any way as I did not have the time to test my decision network, so the
     values chosen would probably have to be changed based on expirementation.
 
-
-
+\printbibliography
 
 \end{oppgave}
 \end{document}
