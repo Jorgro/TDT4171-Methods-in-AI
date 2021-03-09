@@ -73,7 +73,10 @@ class DT():
                 else:
                     k = tree.labels["<" + str(tree.value)]
             else: # discrete variable
-                k = tree.labels[data[tree.name]] # fix key error (Parch/SibSp)
+                if data[tree.name] in tree.labels.keys():
+                    k = tree.labels[data[tree.name]]
+                else:
+                    return 0
             if isinstance(k, type(DT)):
                 tree = k
             else:
@@ -164,12 +167,14 @@ def DTL(examples, attributes, parent_examples):
         if not math.isnan(max_A[1]):
             tree.value = max_A[1]
             new_attr = [x for x in attributes if x != A]
-            exs = examples[examples[A] >= max_A[1]]
+            exs = copy.deepcopy(examples)
+            exs = exs[exs[A] >= max_A[1]]
             new_attr_copy = [x for x in new_attr]
             subtree = DTL(exs, new_attr_copy, examples)
             tree.labels[">=" + str(max_A[1])] = subtree
 
-            exs = examples[examples[A] < max_A[1]]
+            exs = copy.deepcopy(examples)
+            exs = exs[exs[A] >= max_A[1]]
             new_attr_copy = [x for x in new_attr]
             subtree = DTL(exs, new_attr_copy, examples)
             tree.labels["<" + str(max_A[1])] = subtree
@@ -211,8 +216,8 @@ if __name__=='__main__':
     # Discrete attributes
     #attributes.remove('SibSp')
     #attributes.remove('Parch')
-    attributes.remove("Embarked")
-    attributes.remove("Pclass")
+    #attributes.remove("Embarked")
+    #attributes.remove("Pclass")
     #attributes.remove("Sex")
 
     # Testing
@@ -229,8 +234,8 @@ if __name__=='__main__':
     dot = Digraph(comment='Network')
     DT = DTL(training_data, attributes, [])
     DT.graph_tree(DT, dot)
-    dot.save('test.gv')
-    dot.render('test.gv', view=True)
+    dot.save('test2.gv')
+    dot.render('test2.gv', view=True)
 
     test(DT, test_data)
 
