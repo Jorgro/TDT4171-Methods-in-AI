@@ -62,7 +62,6 @@ class DT():
 
         for key, val in tree.labels.items():
             dot.node(str(tree.name)+str(counter[tree.name]), str(tree.name))
-            print(val)
             if val == 1:
                 dot.node(str(val)+str(counter[val]), 'Yes')
                 dot.edge(str(tree.name)+str(counter[tree.name]), str(val)+str(counter[val]), str(key))
