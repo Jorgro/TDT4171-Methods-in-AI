@@ -7,7 +7,7 @@ import math
 
 from graphviz import Digraph
 
-continuous_variables = ['Age', 'Parch']
+continuous_variables = ['Age', 'Parch', 'Cabin', 'Fare', 'Ticket', 'Ticket']
 
 GOAL_ATTRIBUTE = 'Survived'
 
@@ -234,7 +234,7 @@ if __name__=='__main__':
 
     # Discrete attributes
     #attributes.remove('SibSp')
-    attributes.remove('Parch')
+    #attributes.remove('Parch')
     attributes.remove("Embarked")
     #attributes.remove("Pclass")
     #attributes.remove("Sex")
