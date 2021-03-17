@@ -7,7 +7,7 @@ import math
 
 from graphviz import Digraph
 
-continuous_variables = ['Age', 'Parch', 'Cabin', 'Fare', 'Ticket', 'Ticket']
+continuous_variables = ['Age', 'Cabin', 'Fare', 'Ticket', 'SibSp', 'Parch']
 
 GOAL_ATTRIBUTE = 'Survived'
 
@@ -23,19 +23,23 @@ def gain(A, examples):
 
     if A in continuous_variables:
         highest = 0
-        v_k_max = 0
-        for v_k in examples[A].unique(): # Go through all possible splits
+        val_max = 0
+        unique_vals = examples[A].unique()
+        unique_vals.sort()
+
+        for i in range(1, unique_vals.shape[0]): # Go through all possible splits
+            val =(examples[A].iloc[i] + examples[A].iloc[i-1])/2
 
             exs = copy.deepcopy(examples)
-            exs[A] = (exs[A] >= v_k).astype(int)
+            exs[A] = (exs[A] >= val).astype(int) # create split
             p = exs[GOAL_ATTRIBUTE].value_counts()[1]
             n_p_sum = exs[GOAL_ATTRIBUTE].shape[0]
             gain =  B(p/n_p_sum) - remainder(A, exs, n_p_sum)
             if gain > highest:
                 highest = gain
-                v_k_max = v_k
+                val_max = val
 
-        return highest, v_k_max
+        return highest, val_max
 
     else:
         p = examples[GOAL_ATTRIBUTE].value_counts()[1]
@@ -227,7 +231,7 @@ if __name__=='__main__':
 
     # Continuous attributes
     attributes.remove('Name')
-    attributes.remove('Age')
+    #attributes.remove('Age')
     attributes.remove('Cabin')
     attributes.remove('Ticket')
     attributes.remove('Fare')
@@ -244,8 +248,8 @@ if __name__=='__main__':
     dot = Digraph(comment='Network')
     DT = DTL(training_data, attributes, [])
     DT.graph_tree(DT, dot)
-    dot.save('test2.gv')
-    dot.render('test2.gv', view=True)
+    dot.save('test5.gv')
+    dot.render('test5.gv', view=True)
 
     test(DT, test_data)
 
