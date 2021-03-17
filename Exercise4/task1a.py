@@ -7,7 +7,7 @@ import math
 
 from graphviz import Digraph
 
-continuous_variables = ['Age', 'Cabin', 'Fare', 'Ticket', 'SibSp', 'Parch']
+continuous_variables = ['Age', 'Cabin', 'Fare', 'Ticket', 'Parch', 'SibSp'] # change this list to test between discrete and cont. variables
 
 GOAL_ATTRIBUTE = 'Survived'
 
@@ -231,15 +231,15 @@ if __name__=='__main__':
 
     # Continuous attributes
     attributes.remove('Name')
-    #attributes.remove('Age')
-    attributes.remove('Cabin')
-    attributes.remove('Ticket')
-    attributes.remove('Fare')
+    attributes.remove('Age') # removed since missing values
+    attributes.remove('Cabin') # removed since missing values
+    attributes.remove('Ticket') # not good for splitting
+    #attributes.remove('Fare')
 
     # Discrete attributes
     #attributes.remove('SibSp')
     #attributes.remove('Parch')
-    attributes.remove("Embarked")
+    attributes.remove("Embarked") # removed since irrelevant
     #attributes.remove("Pclass")
     #attributes.remove("Sex")
 
