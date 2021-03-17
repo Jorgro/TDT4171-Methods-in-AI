@@ -123,10 +123,6 @@ class DT():
         counter[1] += 1
         counter[0] += 1
 
-
-
-
-
 counter = {
     0: 0,
     1: 0,
@@ -222,12 +218,10 @@ if __name__=='__main__':
 
     training_data = pd.read_csv('Exercise4/train.csv')
 
-    #training_data = training_data.dropna() # drop all rows with na data
-
     attributes = list(training_data.columns.values)
     attributes.remove(GOAL_ATTRIBUTE) # Output attribute
 
-    # Input attributes:
+    # Input attributes: (comment out to add attribute, decomment to remove)
 
     # Continuous attributes
     attributes.remove('Name')
@@ -246,10 +240,10 @@ if __name__=='__main__':
     test_data = pd.read_csv('Exercise4/test.csv')
 
     dot = Digraph(comment='Network')
-    DT = DTL(training_data, attributes, [])
+    DT = DTL(training_data, attributes, []) # create DT
     DT.graph_tree(DT, dot)
     dot.save('test5.gv')
     dot.render('test5.gv', view=True)
 
-    test(DT, test_data)
+    test(DT, test_data) # test DT on test dataset
 
