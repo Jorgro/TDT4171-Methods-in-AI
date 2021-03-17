@@ -28,8 +28,7 @@ def gain(A, examples):
         unique_vals.sort()
 
         for i in range(1, unique_vals.shape[0]): # Go through all possible splits
-            val =(examples[A].iloc[i] + examples[A].iloc[i-1])/2
-
+            val =(unique_vals[i] + unique_vals[i-1])/2
             exs = copy.deepcopy(examples)
             exs[A] = (exs[A] >= val).astype(int) # create split
             p = exs[GOAL_ATTRIBUTE].value_counts()[1]
