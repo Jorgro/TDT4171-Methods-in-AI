@@ -1,34 +1,39 @@
 # Use Python 3.8 or newer (https://www.python.org/downloads/)
 from typing import List
 import unittest
-# Remember to install numpy (https://numpy.org/install/)!
 import numpy as np
 import pickle
 import os
 from math import e
 
-# TODO: Write docs
-
 
 class Node:
+    """ Class representing a node in the NeuralNetwork. """
 
     def __init__(self, N: int) -> None:
+        """ Initialize a node.
+        :param N: Number of weights from this node to the next layer.
+        :return: None.
+        """
         self.N = N
-        self.a = 0
+        self.a = 0  # activation value
 
         if self.N:
-            self.weights = np.zeros(self.N)
+            self.weights = np.zeros(self.N)  # initialize weights
 
     def randomize_weights(self):
-        # weights in [-0.5, 0.5)
+        """ Randomizes the weights of this node between -0.5 and 0.5 """
+
         self.weights = np.random.rand(self.N)-0.5
 
 
 def g(x: float) -> float:
+    """ Sigmoid activation function. """
     return 1/(1+e**(-x))
 
 
 def dg(x: float) -> float:
+    """ Derivative of sigmoid activation function. """
     return g(x)*(1-g(x))
 
 
@@ -64,31 +69,28 @@ class NeuralNetwork:
         self.x_train, self.y_train = None, None
         self.x_test, self.y_test = None, None
 
-        # TODO: Make necessary changes here. For example, assigning the arguments "input_dim" and "hidden_layer" to
-        # variables and so forth.
-
         self.input_dim = input_dim
         self.hidden_layer = hidden_layer
 
         self.output_nodes = [Node(0)]  # TODO: Maybe remove list..?
 
+        # initialize the layers with nodes depending on hidden layer or not
         if self.hidden_layer:
             self.hidden_nodes: List[Node] = [
                 Node(1) for _ in range(self.hidden_units)]
 
             self.input_nodes: List[Node] = [
-                Node(self.hidden_units) for _ in range(self.input_dim+1)]
+                Node(self.hidden_units) for _ in range(self.input_dim+1)]  # +1 for bias node
 
             self.layers = [self.input_nodes,
                            self.hidden_nodes, self.output_nodes]
-            self.L = len(self.layers)
         else:
             self.input_nodes: List[Node] = [
-                Node(1) for _ in range(self.input_dim+1)]
+                Node(1) for _ in range(self.input_dim+1)]  # +1 for bias node
             self.layers = [self.input_nodes, self.output_nodes]
-            self.L = len(self.layers)
 
-        self.input_nodes[-1].a = 1
+        self.L = len(self.layers)
+        self.input_nodes[-1].a = 1  # set bias activation to always be 1
 
     def load_data(self, file_path: str = os.path.join(os.getcwd(), 'data_breast_cancer.p')) -> None:
         """
@@ -108,45 +110,68 @@ class NeuralNetwork:
             self.x_train, self.y_train = data['x_train'], data['y_train']
             self.x_test, self.y_test = data['x_test'], data['y_test']
 
-    def propagate_forward(self, x) -> List[List[float]]:
-        weighted_sum: List[List[float]] = [[] for _ in range(self.L)]
+    def propagate_forward(self, x: np.ndarray) -> List[List[float]]:
+        """ Propagate x forward in the network.
+        :param x: Input to propagate forward.
+        """
 
+        weighted_sum: List[List[float]] = [[] for _ in range(
+            self.L)]  # list of weighted sum for each node
+        # note that the first list will always be empty since this is the input layer
+        # it is only there to make indexing more intuitive
+
+        # propagate input into input layer
         for i in range(self.input_dim):
             self.input_nodes[i].a = x[i]
 
+        # for each other node in hidden and output layer calculate the activation
         for i in range(1, self.L):
             for j, node in enumerate(self.layers[i]):
+                # calculate weighted sum
                 in_j = sum([k.a*k.weights[j] for k in self.layers[i-1]])
                 weighted_sum[i].append(in_j)
-                node.a = g(in_j)
+                node.a = g(in_j)  # calculate activation for this node
 
         return weighted_sum
 
     def train(self) -> None:
-        """Run the backpropagation algorithm to train this neural network"""
+        """Run the backpropagation algorithm to train this neural network."""
 
+        # randomize the weights for each node (between -0.5 and 0.5)
         for l in self.layers:
             for node in l:
                 node.randomize_weights()
 
+        # repeat learning step for epochs time
         for _ in range(self.epochs):
+
+            # go through training data
             for x, y in zip(self.x_train, self.y_train):
+                # propagate forward to find activations and weighted sums
                 weighted_sums = self.propagate_forward(x)
+
+                # initialize error for each node
                 deltas = [[] for _ in range(self.L)]
 
+                # propagate backward to output layer
                 for j, node in enumerate(self.output_nodes):
                     deltas[self.L -
                            1].append(dg(weighted_sums[self.L-1][j])*(y-node.a))
+                    # ∆[j]←g′(inj) × (yj − aj)
 
+                # propagate backward through rest of layers
                 for l in range(self.L-2, 0, -1):
                     for i, node in enumerate(self.layers[l]):
                         deltas[l].append(dg(weighted_sums[l][i])*sum(
                             [node.weights[j]*deltas[l+1][j] for j in range(len(self.layers[l+1]))]))
+                        # ∆[i] ← g′(ini) sum_j (wi,j ∆[j])
 
+                # update weights
                 for l in range(self.L-1):
                     for node in self.layers[l]:
                         for k in range(node.N):
                             node.weights[k] += self.lr*deltas[l+1][k]*node.a
+                            # wi,j←wi,j + α × ai × ∆[j]
 
     def predict(self, x: np.ndarray) -> float:
         """
@@ -155,8 +180,8 @@ class NeuralNetwork:
         :param x: A single example (vector) with shape = (number of features)
         :return: A float specifying probability which is bounded [0, 1].
         """
-        self.propagate_forward(x)
-        return self.output_nodes[0].a
+        self.propagate_forward(x)  # propagate forward
+        return self.output_nodes[0].a  # return activation of output node
 
 
 class TestAssignment5(unittest.TestCase):
@@ -196,7 +221,7 @@ class TestAssignment5(unittest.TestCase):
 
         self.network = self.nn_class(self.n_features, False)
         accuracy = self.get_accuracy()
-        print("Accuracy perceptron: ", accuracy) # TODO: Remove
+        print("Accuracy perceptron: ", accuracy)  # TODO: Remove
         self.assertTrue(accuracy > self.threshold,
                         'This implementation is most likely wrong since '
                         f'the accuracy ({accuracy}) is less than {self.threshold}.')
@@ -206,7 +231,7 @@ class TestAssignment5(unittest.TestCase):
 
         self.network = self.nn_class(self.n_features, True)
         accuracy = self.get_accuracy()
-        print("Accuracy hidden: ", accuracy) # TODO: Remove
+        print("Accuracy hidden: ", accuracy)  # TODO: Remove
         self.assertTrue(accuracy > self.threshold,
                         'This implementation is most likely wrong since '
                         f'the accuracy ({accuracy}) is less than {self.threshold}.')
