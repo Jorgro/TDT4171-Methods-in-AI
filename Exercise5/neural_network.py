@@ -135,7 +135,10 @@ class NeuralNetwork:
         return weighted_sum
 
     def train(self) -> None:
-        """Run the backpropagation algorithm to train this neural network."""
+        """Run the backpropagation algorithm to train this neural network.
+        The runtime could be improved using NumPy arrays more effectively.
+        On a decent CPU the runtime should still be pretty low, ~150s on my computer.
+        """
 
         # randomize the weights for each node (between -0.5 and 0.5)
         for l in self.layers:
