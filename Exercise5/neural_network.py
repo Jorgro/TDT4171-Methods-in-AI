@@ -8,17 +8,18 @@ from math import e
 
 
 class Node:
-    """ Class representing a node in the NeuralNetwork. """
+    """ Class representing a node in the NeuralNetwork."""
 
     def __init__(self, N: int) -> None:
         """ Initialize a node.
+
         :param N: Number of weights from this node to the next layer.
         :return: None.
         """
         self.N = N
         self.a = 0  # activation value
 
-        if self.N:
+        if self.N:  # a node can have no weights to next layer if it is in output layer
             self.weights = np.zeros(self.N)  # initialize weights
 
     def randomize_weights(self):
@@ -28,12 +29,18 @@ class Node:
 
 
 def g(x: float) -> float:
-    """ Sigmoid activation function. """
+    """ Sigmoid activation function.
+
+    :return: Sigmoid function value at x.
+    """
     return 1/(1+e**(-x))
 
 
 def dg(x: float) -> float:
-    """ Derivative of sigmoid activation function. """
+    """ Derivative of sigmoid activation function.
+
+    :return: Sigmoid derivative function value at x.
+    """
     return g(x)*(1-g(x))
 
 
@@ -42,13 +49,11 @@ class NeuralNetwork:
     def __init__(self, input_dim: int, hidden_layer: bool) -> None:
         """
         Initialize the feed-forward neural network with the given arguments.
+
         :param input_dim: Number of features in the dataset.
         :param hidden_layer: Whether or not to include a hidden layer.
         :return: None.
         """
-
-        # --- PLEASE READ --
-        # Use the parameters below to train your feed-forward neural network.
 
         # Number of hidden units if hidden_layer = True.
         self.hidden_units = 25
@@ -56,7 +61,7 @@ class NeuralNetwork:
         # This parameter is called the step size, also known as the learning rate (lr).
         # See 18.6.1 in AIMA 3rd edition (page 719).
         # This is the value of α on Line 25 in Figure 18.24.
-        self.lr = 1e-2
+        self.lr = 1e-2  # increased a bit to achieve higher accuracy.
 
         # Line 6 in Figure 18.24 says "repeat".
         # This is the number of times we are going to repeat. This is often known as epochs.
@@ -72,9 +77,10 @@ class NeuralNetwork:
         self.input_dim = input_dim
         self.hidden_layer = hidden_layer
 
-        self.output_nodes = [Node(0)]  # TODO: Maybe remove list..?
+        # List because of modularity (if there should be more output nodes)
+        self.output_nodes = [Node(0)]
 
-        # initialize the layers with nodes depending on hidden layer or not
+        # Initialize the layers with nodes depending on hidden layer or not
         if self.hidden_layer:
             self.hidden_nodes: List[Node] = [
                 Node(1) for _ in range(self.hidden_units)]
@@ -90,12 +96,10 @@ class NeuralNetwork:
             self.layers = [self.input_nodes, self.output_nodes]
 
         self.L = len(self.layers)
-        self.input_nodes[-1].a = 1  # set bias activation to always be 1
+        self.input_nodes[-1].a = 1  # Set bias activation to always be 1
 
     def load_data(self, file_path: str = os.path.join(os.getcwd(), 'data_breast_cancer.p')) -> None:
         """
-        Do not change anything in this method.
-
         Load data for training and testing the model.
         :param file_path: Path to the file 'data_breast_cancer.p' downloaded from Blackboard. If no arguments is given,
         the method assumes that the file is in the current working directory.
@@ -112,7 +116,9 @@ class NeuralNetwork:
 
     def propagate_forward(self, x: np.ndarray) -> List[List[float]]:
         """ Propagate x forward in the network.
+
         :param x: Input to propagate forward.
+        :return: Weighted sum for each node.
         """
 
         weighted_sum: List[List[float]] = [[] for _ in range(
@@ -137,7 +143,8 @@ class NeuralNetwork:
     def train(self) -> None:
         """Run the backpropagation algorithm to train this neural network.
         The runtime could be improved using NumPy arrays more effectively.
-        On a decent CPU the runtime should still be pretty low, ~150s on my computer.
+        On a decent CPU the runtime should still be pretty low, ~150s @ 2.3 GHz Intel i5.
+        It could have been more optimized using more numpy arrays.
         """
 
         # randomize the weights for each node (between -0.5 and 0.5)
@@ -173,13 +180,14 @@ class NeuralNetwork:
                 for l in range(self.L-1):
                     for node in self.layers[l]:
                         for k in range(node.N):
-                            node.weights[k] += self.lr*deltas[l+1][k]*node.a
+                            node.weights[k] += self.lr*node.a*deltas[l+1][k]
                             # wi,j←wi,j + α × ai × ∆[j]
 
     def predict(self, x: np.ndarray) -> float:
         """
         Given an example x we want to predict its class probability.
         For example, for the breast cancer dataset we want to get the probability for cancer given the example x.
+
         :param x: A single example (vector) with shape = (number of features)
         :return: A float specifying probability which is bounded [0, 1].
         """
